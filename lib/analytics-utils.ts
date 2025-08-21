@@ -68,11 +68,11 @@ export function calculateAnalytics(expenses: Expense[]): AnalyticsData {
   const daysWithExpenses = uniqueDates.size
   const averageDaily = totalSpent / Math.max(1, daysWithExpenses)
 
-  // Calculate date range for daily average
-  const dates = expenses.map((e) => new Date(e.date))
-  const minDate = new Date(Math.min(...dates.map((d) => d.getTime())))
-  const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())))
-  const daysDiff = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)))
+  // Calculate date range for daily average (unused but kept for future use)
+  // const dates = expenses.map((e) => new Date(e.date))
+  // const minDate = new Date(Math.min(...dates.map((d) => d.getTime())))
+  // const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())))
+  // const daysDiff = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)))
 
   // Category insights
   const categoryTotals = expenses.reduce(

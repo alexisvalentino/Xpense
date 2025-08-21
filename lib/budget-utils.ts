@@ -1,5 +1,4 @@
-import type { Expense } from "@/app/page"
-import type { Budget } from "@/lib/db"
+import type { Expense, Budget } from "@/lib/db"
 
 export interface BudgetProgress {
   budget: Budget

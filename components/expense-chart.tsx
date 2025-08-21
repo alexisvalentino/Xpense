@@ -8,6 +8,23 @@ interface ExpenseChartProps {
   expenses: Expense[]
 }
 
+interface TooltipProps {
+  active?: boolean
+  payload?: Array<{
+    name: string
+    value: number
+  }>
+}
+
+interface LabelProps {
+  cx: number
+  cy: number
+  midAngle: number
+  innerRadius: number
+  outerRadius: number
+  percent: number
+}
+
 export function ExpenseChart({ expenses }: ExpenseChartProps) {
   // Group expenses by category
   const categoryData = expenses.reduce(
@@ -29,7 +46,7 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
   // Sort by value descending
   categoryData.sort((a, b) => b.value - a.value)
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0]
       return (
@@ -42,7 +59,7 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
     return null
   }
 
-  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: LabelProps) => {
     if (percent < 0.05) return null // Don't show labels for slices less than 5%
 
     const RADIAN = Math.PI / 180
