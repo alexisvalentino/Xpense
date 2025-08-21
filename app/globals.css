@@ -1,69 +1,32 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
-  --background: oklch(0.11 0 0); /* #111827 - Very dark background */
+  --background: oklch(0.11 0 0); /* Dark black background */
   --foreground: oklch(0.985 0 0); /* White text */
   --card: oklch(0.15 0 0 / 0.1); /* Glassmorphism card with transparency */
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.15 0 0 / 0.1); /* Glassmorphism popover */
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.205 0 0); /* #1f2937 - Dark gray primary */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.646 0.222 162.48); /* #059669 - Emerald accent */
+  --primary: oklch(0.985 0 0); /* White primary */
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.646 0.222 162.48); /* Emerald green accent */
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.398 0 0); /* #374151 - Gray muted */
-  --muted-foreground: oklch(0.985 0 0);
-  --accent: oklch(0.696 0.17 162.48); /* #10b981 - Lighter emerald */
+  --muted: oklch(0.398 0 0); /* Gray muted */
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.696 0.17 162.48); /* Lighter emerald */
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325); /* Red for errors */
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.985 0 0 / 0.2); /* Semi-transparent white border */
   --input: oklch(0.15 0 0 / 0.1); /* Glassmorphism input */
   --ring: oklch(0.646 0.222 162.48); /* Emerald focus ring */
-  --chart-1: oklch(0.696 0.17 162.48); /* #10b981 - Emerald */
-  --chart-2: oklch(0.6 0.243 264.376); /* #6366f1 - Indigo */
-  --chart-3: oklch(0.769 0.188 70.08); /* #f59e0b - Amber */
-  --chart-4: oklch(0.577 0.245 27.325); /* #ef4444 - Red */
-  --chart-5: oklch(0.769 0.188 320); /* #d946ef - Magenta */
+  --chart-1: oklch(0.696 0.17 162.48); /* Emerald */
+  --chart-2: oklch(0.6 0.243 264.376); /* Indigo */
+  --chart-3: oklch(0.769 0.188 70.08); /* Amber */
+  --chart-4: oklch(0.577 0.245 27.325); /* Red */
+  --chart-5: oklch(0.769 0.188 320); /* Magenta */
   --radius: 0.5rem;
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.398 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.696 0.17 162.48);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.985 0 0 / 0.2);
-  --sidebar-ring: oklch(0.646 0.222 162.48);
-}
-
-.dark {
-  --background: oklch(0.11 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.15 0 0 / 0.1);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.15 0 0 / 0.1);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.646 0.222 162.48);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.398 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.696 0.17 162.48);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.985 0 0 / 0.2);
-  --input: oklch(0.15 0 0 / 0.1);
-  --ring: oklch(0.646 0.222 162.48);
-  --chart-1: oklch(0.696 0.17 162.48);
-  --chart-2: oklch(0.6 0.243 264.376);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.577 0.245 27.325);
-  --chart-5: oklch(0.769 0.188 320);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -145,5 +108,43 @@
   /* Added sidebar glassmorphism styles */
   .glass-sidebar {
     @apply backdrop-blur-xl bg-card/30 border-r border-border/30 shadow-2xl;
+  }
+  
+  /* Mobile scrollbar hiding */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Mobile touch improvements */
+  @media (max-width: 768px) {
+    .touch-manipulation {
+      touch-action: manipulation;
+    }
+    
+    .mobile-tap-highlight {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Ensure proper mobile scrolling */
+    html, body {
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Fix mobile viewport height issues */
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height for mobile */
+    }
+    
+    /* Safe area padding for mobile devices */
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
   }
 }
