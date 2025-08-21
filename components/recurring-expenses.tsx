@@ -201,8 +201,12 @@ export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
             <Repeat className="h-5 w-5 text-secondary" />
             <span>Recurring Expenses</span>
           </CardTitle>
-          <Button onClick={() => setShowForm(true)} size="sm" className="bg-secondary hover:bg-secondary/90">
-            <Plus className="h-4 w-4 mr-1" />
+          <Button 
+            onClick={() => setShowForm(true)} 
+            size="sm" 
+            className="bg-secondary hover:bg-secondary/90 rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <Plus className="h-4 w-4 mr-2" />
             Add Recurring
           </Button>
         </div>
@@ -290,11 +294,19 @@ export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
                   />
                 </div>
 
-                <div className="flex space-x-2 pt-4">
-                  <Button type="submit" className="flex-1 bg-secondary hover:bg-secondary/90">
+                <div className="flex space-x-3 pt-4">
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-secondary hover:bg-secondary/90 rounded-full py-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
                     {editingRecurring ? "Update" : "Add"} Recurring Expense
                   </Button>
-                  <Button type="button" variant="outline" onClick={resetForm} className="flex-1 glass bg-transparent">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={resetForm} 
+                    className="flex-1 glass bg-transparent rounded-full py-2 hover:bg-secondary/10 transition-all duration-200"
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -331,7 +343,7 @@ export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Badge variant={dueStatus.color as any} className="text-xs">
+                          <Badge variant={dueStatus.color as "default" | "secondary" | "destructive" | "outline"} className="text-xs">
                             <Clock className="h-3 w-3 mr-1" />
                             {dueStatus.text}
                           </Badge>
@@ -351,19 +363,24 @@ export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
                             <Button
                               onClick={() => handleExecuteRecurring(recurring)}
                               size="sm"
-                              className="bg-secondary hover:bg-secondary/90"
+                              className="bg-secondary hover:bg-secondary/90 rounded-full px-4 py-1 shadow-md hover:shadow-lg transition-all duration-200"
                             >
                               Add Now
                             </Button>
                           )}
-                          <Button onClick={() => handleEdit(recurring)} variant="ghost" size="sm">
+                          <Button 
+                            onClick={() => handleEdit(recurring)} 
+                            variant="ghost" 
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-full hover:bg-secondary/20 transition-all duration-200"
+                          >
                             <Edit className="h-3 w-3" />
                           </Button>
                           <Button
                             onClick={() => handleDelete(recurring.id)}
                             variant="ghost"
                             size="sm"
-                            className="text-destructive hover:text-destructive"
+                            className="h-8 w-8 p-0 rounded-full text-destructive hover:text-destructive hover:bg-destructive/20 transition-all duration-200"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -382,7 +399,10 @@ export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">No recurring expenses</h3>
             <p className="text-muted-foreground mb-4">Set up recurring expenses like subscriptions and bills</p>
-            <Button onClick={() => setShowForm(true)} className="bg-secondary hover:bg-secondary/90">
+            <Button 
+              onClick={() => setShowForm(true)} 
+              className="bg-secondary hover:bg-secondary/90 rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Your First Recurring Expense
             </Button>

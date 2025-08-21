@@ -242,7 +242,7 @@ export function AnalyticsDashboard({ expenses }: AnalyticsDashboardProps) {
                     borderRadius: "8px",
                   }}
                 />
-                <Bar dataKey="amount" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="amount" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -261,7 +261,7 @@ export function AnalyticsDashboard({ expenses }: AnalyticsDashboardProps) {
           <CardContent>
             <div className="space-y-3">
               {insights.map((insight, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 glass-strong rounded-lg">
+                <div key={index} className="flex items-start space-x-3 p-4 glass-strong rounded-xl border border-amber-500/20">
                   <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-foreground">{insight}</p>
                 </div>

@@ -146,8 +146,12 @@ export function BudgetManagement({ expenses }: BudgetManagementProps) {
             <Target className="h-5 w-5 text-secondary" />
             <span>Budget Management</span>
           </CardTitle>
-          <Button onClick={() => setShowForm(true)} size="sm" className="bg-secondary hover:bg-secondary/90">
-            <Plus className="h-4 w-4 mr-1" />
+          <Button 
+            onClick={() => setShowForm(true)} 
+            size="sm" 
+            className="bg-secondary hover:bg-secondary/90 rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <Plus className="h-4 w-4 mr-2" />
             Add Budget
           </Button>
         </div>
@@ -214,11 +218,19 @@ export function BudgetManagement({ expenses }: BudgetManagementProps) {
                   </Select>
                 </div>
 
-                <div className="flex space-x-2 pt-4">
-                  <Button type="submit" className="flex-1 bg-secondary hover:bg-secondary/90">
+                <div className="flex space-x-3 pt-4">
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-secondary hover:bg-secondary/90 rounded-full py-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
                     {editingBudget ? "Update Budget" : "Add Budget"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={resetForm} className="flex-1 glass bg-transparent">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={resetForm} 
+                    className="flex-1 glass bg-transparent rounded-full py-2 hover:bg-secondary/10 transition-all duration-200"
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -246,15 +258,20 @@ export function BudgetManagement({ expenses }: BudgetManagementProps) {
                           {formatPeriod(progress.budget.period)}
                         </Badge>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Button onClick={() => handleEdit(progress.budget)} variant="ghost" size="sm">
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          onClick={() => handleEdit(progress.budget)} 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-full hover:bg-secondary/20 transition-all duration-200"
+                        >
                           <Edit className="h-3 w-3" />
                         </Button>
                         <Button
                           onClick={() => handleDelete(progress.budget.id)}
                           variant="ghost"
                           size="sm"
-                          className="text-destructive hover:text-destructive"
+                          className="h-8 w-8 p-0 rounded-full text-destructive hover:text-destructive hover:bg-destructive/20 transition-all duration-200"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -309,7 +326,10 @@ export function BudgetManagement({ expenses }: BudgetManagementProps) {
             <p className="text-muted-foreground mb-4">
               Create your first budget to start tracking your spending limits
             </p>
-            <Button onClick={() => setShowForm(true)} className="bg-secondary hover:bg-secondary/90">
+            <Button 
+              onClick={() => setShowForm(true)} 
+              className="bg-secondary hover:bg-secondary/90 rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Your First Budget
             </Button>
