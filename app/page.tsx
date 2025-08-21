@@ -7,7 +7,7 @@ import { Plus, DollarSign, TrendingUp, Calendar, Undo2 } from "lucide-react"
 import { ExpenseForm } from "@/components/expense-form"
 import { ExpenseChart } from "@/components/expense-chart"
 import { ExpenseList } from "@/components/expense-list"
-import { ExpenseFilters, type FilterOptions } from "@/components/expense-filters"
+import type { FilterOptions } from "@/components/expense-filters"
 import { BudgetManagement } from "@/components/budget-management"
 import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { QuickAddButtons } from "@/components/quick-add-buttons"
@@ -16,6 +16,7 @@ import { DataExport } from "@/components/data-export"
 import { ResponsiveNavigation } from "@/components/responsive-navigation"
 import { ResponsiveHeader } from "@/components/responsive-header"
 import { expenseDB, type Expense, type Budget, type RecurringExpense } from "@/lib/db"
+import { calculateBudgetProgress } from "@/lib/budget-utils"
 import { filterExpenses, hasActiveFilters, getFilteredTotal, sortExpenses } from "@/lib/expense-utils"
 
 export default function ExpenseTracker() {
@@ -28,28 +29,83 @@ export default function ExpenseTracker() {
   const [undoExpense, setUndoExpense] = useState<Expense | null>(null)
   const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null)
   const [activeTab, setActiveTab] = useState<"overview" | "budgets" | "analytics" | "recurring" | "export">("overview")
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const [filters, setFilters] = useState<FilterOptions>({
-    search: "",
-    category: "",
-    dateFrom: "",
-    dateTo: "",
-    minAmount: "",
-    maxAmount: "",
-  })
+  type AppNotification = {
+    id: string
+    title: string
+    message: string
+    severity: "info" | "warning" | "danger"
+  }
 
   const filteredExpenses = useMemo(() => {
-    const filtered = filterExpenses(expenses, filters)
-    return sortExpenses(filtered, "date", "desc")
-  }, [expenses, filters])
+    const sorted = sortExpenses(expenses, "date", "desc")
+    if (!searchQuery.trim()) return sorted
+    const q = searchQuery.toLowerCase()
+    return sorted.filter((e) =>
+      e.description.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q) ||
+      e.amount.toString().includes(q)
+    )
+  }, [expenses, searchQuery])
 
-  const filteredTotal = useMemo(() => {
-    return getFilteredTotal(filteredExpenses)
-  }, [filteredExpenses])
+  const notifications = useMemo<AppNotification[]>(() => {
+    const items: AppNotification[] = []
 
-  const hasFilters = useMemo(() => {
-    return hasActiveFilters(filters)
-  }, [filters])
+    // Budget notifications
+    for (const budget of budgets) {
+      const progress = calculateBudgetProgress(budget, expenses)
+      if (progress.status === "warning") {
+        items.push({
+          id: `budget-${budget.id}-warning`,
+          title: `Budget warning: ${budget.category}`,
+          message: `You\'ve used ${progress.percentage.toFixed(0)}% of your ${budget.category} budget. $${progress.remaining.toLocaleString()} remaining.`,
+          severity: "warning",
+        })
+      } else if (progress.status === "danger") {
+        items.push({
+          id: `budget-${budget.id}-danger`,
+          title: `Budget high: ${budget.category}`,
+          message: `You\'re at ${progress.percentage.toFixed(0)}% of your ${budget.category} budget. Consider reducing spending.`,
+          severity: "danger",
+        })
+      } else if (progress.status === "exceeded") {
+        items.push({
+          id: `budget-${budget.id}-exceeded`,
+          title: `Budget exceeded: ${budget.category}`,
+          message: `You exceeded the ${budget.category} budget by $${(progress.spent - budget.limit).toLocaleString()}.`,
+          severity: "danger",
+        })
+      }
+    }
+
+    // Recurring due notifications (overdue, due today, in <=3 days)
+    const getDueStatus = (nextDue: string) => {
+      const due = new Date(nextDue)
+      const today = new Date()
+      const diffTime = due.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      if (diffDays < 0) return { status: "overdue", text: "Overdue" }
+      if (diffDays === 0) return { status: "due", text: "Due today" }
+      if (diffDays <= 3) return { status: "soon", text: `Due in ${diffDays} days` }
+      return { status: "future", text: `Due in ${diffDays} days"` }
+    }
+
+    for (const r of recurringExpenses) {
+      if (!r.isActive) continue
+      const due = getDueStatus(r.nextDue)
+      if (due.status === "overdue" || due.status === "due" || due.status === "soon") {
+        items.push({
+          id: `recurring-${r.id}-${due.status}`,
+          title: `Recurring: ${r.description}`,
+          message: `${due.text} • $${r.amount} • ${r.category}`,
+          severity: due.status === "soon" ? "info" : "warning",
+        })
+      }
+    }
+
+    return items
+  }, [budgets, expenses, recurringExpenses])
 
   useEffect(() => {
     const loadData = async () => {
@@ -171,20 +227,7 @@ export default function ExpenseTracker() {
     setEditingExpense(null)
   }
 
-  const handleFiltersChange = (newFilters: FilterOptions) => {
-    setFilters(newFilters)
-  }
 
-  const clearFilters = () => {
-    setFilters({
-      search: "",
-      category: "",
-      dateFrom: "",
-      dateTo: "",
-      minAmount: "",
-      maxAmount: "",
-    })
-  }
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
 
@@ -201,9 +244,15 @@ export default function ExpenseTracker() {
 
   return (
     <div className="min-h-screen bg-background">
-      <ResponsiveNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <ResponsiveNavigation 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        notifications={notifications}
+      />
       <div className="md:ml-64">
-        <div className="container mx-auto px-4 py-4 md:py-6 space-y-4 md:space-y-6 max-w-7xl">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6 max-w-7xl pb-safe md:pt-24">
           <ResponsiveHeader />
 
           {activeTab === "budgets" ? (
@@ -223,7 +272,7 @@ export default function ExpenseTracker() {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center space-x-2 min-w-0">
                         <Undo2 className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                        <span className="text-sm truncate">Deleted "{undoExpense.description}"</span>
+                        <span className="text-sm truncate">Deleted &quot;{undoExpense.description}&quot;</span>
                       </div>
                       <Button
                         onClick={undoDelete}
@@ -248,16 +297,11 @@ export default function ExpenseTracker() {
                       </div>
                       <div className="text-center">
                         <p className="text-xs md:text-sm text-muted-foreground">
-                          {hasFilters ? "Filtered" : "Total"} Expenses
+                          Total Expenses
                         </p>
                         <p className="text-2xl md:text-4xl font-bold text-foreground">
-                          ${(hasFilters ? filteredTotal : totalExpenses).toLocaleString()}
+                          ${totalExpenses.toLocaleString()}
                         </p>
-                        {hasFilters && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {filteredExpenses.length} of {expenses.length} expenses
-                          </p>
-                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -268,7 +312,7 @@ export default function ExpenseTracker() {
                     <CardHeader className="pb-2 md:pb-4">
                       <CardTitle className="flex items-center space-x-2 text-base md:text-lg">
                         <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
-                        <span>{hasFilters ? "Filtered" : ""} Expense Breakdown</span>
+                        <span>Expense Breakdown</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-2 md:p-6">
@@ -279,26 +323,19 @@ export default function ExpenseTracker() {
               </div>
 
               {/* Quick Add Buttons */}
-              <QuickAddButtons onQuickAdd={addExpense} />
+              <QuickAddButtons 
+                onQuickAdd={addExpense} 
+              />
 
-              {expenses.length > 0 && (
-                <div className="w-full">
-                  <ExpenseFilters
-                    filters={filters}
-                    onFiltersChange={handleFiltersChange}
-                    onClearFilters={clearFilters}
-                    hasActiveFilters={hasFilters}
-                  />
-                </div>
-              )}
+
 
               <div className="flex justify-center">
                 <Button
                   onClick={() => setShowForm(true)}
-                  className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-2 md:py-3 rounded-full w-full sm:w-auto"
+                  className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-full w-full sm:w-auto h-12 md:h-14 text-base md:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                   size="lg"
                 >
-                  <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
+                  <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                   Add Expense
                 </Button>
               </div>
@@ -309,15 +346,15 @@ export default function ExpenseTracker() {
                   <CardHeader className="pb-2 md:pb-4">
                     <CardTitle className="flex items-center space-x-2 text-base md:text-lg">
                       <Calendar className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
-                      <span>{hasFilters ? "Filtered" : "Recent"} Expenses</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-2 md:p-6">
-                    <ExpenseList
-                      expenses={hasFilters ? filteredExpenses : filteredExpenses.slice(0, 10)}
-                      onDelete={deleteExpense}
-                      onEdit={handleEdit}
-                    />
+                                              <span>Recent Expenses</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-2 md:p-6">
+                      <ExpenseList
+                        expenses={filteredExpenses.slice(0, 10)}
+                        onDelete={deleteExpense}
+                        onEdit={handleEdit}
+                      />
                   </CardContent>
                 </Card>
               )}
@@ -341,24 +378,7 @@ export default function ExpenseTracker() {
                 </Card>
               )}
 
-              {/* No Results State */}
-              {expenses.length > 0 && filteredExpenses.length === 0 && hasFilters && (
-                <Card className="glass">
-                  <CardContent className="p-8 md:p-12 text-center">
-                    <div className="space-y-4">
-                      <div className="p-3 md:p-4 rounded-full bg-muted/20 w-fit mx-auto">
-                        <Calendar className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="text-base md:text-lg font-semibold text-foreground">No matching expenses</h3>
-                        <p className="text-sm md:text-base text-muted-foreground">
-                          Try adjusting your search or filter criteria
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+
             </div>
           )}
 
