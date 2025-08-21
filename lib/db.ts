@@ -26,12 +26,24 @@ export interface RecurringExpense {
   createdAt: string
 }
 
+export interface QuickAddOption {
+  id: string
+  icon: string
+  label: string
+  amount: number
+  category: string
+  description: string
+  order: number
+  createdAt: string
+}
+
 class ExpenseDB {
   private dbName = "ExpenseTrackerDB"
-  private version = 3
+  private version = 4
   private expenseStoreName = "expenses"
   private budgetStoreName = "budgets"
   private recurringStoreName = "recurring"
+  private quickAddStoreName = "quickAdd"
 
   async openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
@@ -61,6 +73,12 @@ class ExpenseDB {
           const recurringStore = db.createObjectStore(this.recurringStoreName, { keyPath: "id" })
           recurringStore.createIndex("nextDue", "nextDue", { unique: false })
           recurringStore.createIndex("isActive", "isActive", { unique: false })
+        }
+
+        // Create quick add options store if it doesn't exist
+        if (!db.objectStoreNames.contains(this.quickAddStoreName)) {
+          const quickAddStore = db.createObjectStore(this.quickAddStoreName, { keyPath: "id" })
+          quickAddStore.createIndex("order", "order", { unique: false })
         }
       }
     })
@@ -130,7 +148,8 @@ class ExpenseDB {
     const expenses = await this.getAllExpenses()
     const budgets = await this.getAllBudgets()
     const recurring = await this.getAllRecurringExpenses()
-    return JSON.stringify({ expenses, budgets, recurring }, null, 2)
+    const quickAdd = await this.getAllQuickAddOptions()
+    return JSON.stringify({ expenses, budgets, recurring, quickAdd }, null, 2)
   }
 
   async importData(jsonData: string): Promise<void> {
@@ -138,6 +157,7 @@ class ExpenseDB {
     const expenses: Expense[] = data.expenses || []
     const budgets: Budget[] = data.budgets || []
     const recurring: RecurringExpense[] = data.recurring || []
+    const quickAdd: QuickAddOption[] = data.quickAdd || []
     const db = await this.openDB()
 
     return new Promise((resolve, reject) => {
@@ -174,12 +194,26 @@ class ExpenseDB {
         recurringStore.add(recurringExpense)
       })
 
+      const quickAddTransaction = db.transaction([this.quickAddStoreName], "readwrite")
+      const quickAddStore = quickAddTransaction.objectStore(this.quickAddStoreName)
+
+      // Clear existing data
+      quickAddStore.clear()
+
+      // Add imported data
+      quickAdd.forEach((option) => {
+        quickAddStore.add(option)
+      })
+
       expenseTransaction.onerror = () => reject(expenseTransaction.error)
       expenseTransaction.oncomplete = () => {
         budgetTransaction.onerror = () => reject(budgetTransaction.error)
         budgetTransaction.oncomplete = () => {
           recurringTransaction.onerror = () => reject(recurringTransaction.error)
-          recurringTransaction.oncomplete = () => resolve()
+          recurringTransaction.oncomplete = () => {
+            quickAddTransaction.onerror = () => reject(quickAddTransaction.error)
+            quickAddTransaction.oncomplete = () => resolve()
+          }
         }
       }
     })
@@ -200,13 +234,20 @@ class ExpenseDB {
       const recurringStore = recurringTransaction.objectStore(this.recurringStoreName)
       const recurringRequest = recurringStore.clear()
 
+      const quickAddTransaction = db.transaction([this.quickAddStoreName], "readwrite")
+      const quickAddStore = quickAddTransaction.objectStore(this.quickAddStoreName)
+      const quickAddRequest = quickAddStore.clear()
+
       expenseTransaction.onerror = () => reject(expenseTransaction.error)
       budgetTransaction.onerror = () => reject(budgetTransaction.error)
       recurringTransaction.onerror = () => reject(recurringTransaction.error)
+      quickAddTransaction.onerror = () => reject(quickAddTransaction.error)
 
       expenseRequest.onsuccess = () => {
         budgetRequest.onsuccess = () => {
-          recurringRequest.onsuccess = () => resolve()
+          recurringRequest.onsuccess = () => {
+            quickAddRequest.onsuccess = () => resolve()
+          }
         }
       }
     })
@@ -319,6 +360,111 @@ class ExpenseDB {
       request.onerror = () => reject(request.error)
       request.onsuccess = () => resolve()
     })
+  }
+
+  async getAllQuickAddOptions(): Promise<QuickAddOption[]> {
+    const db = await this.openDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.quickAddStoreName], "readonly")
+      const store = transaction.objectStore(this.quickAddStoreName)
+      const index = store.index("order")
+      const request = index.getAll()
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve(request.result)
+    })
+  }
+
+  async addQuickAddOption(option: QuickAddOption): Promise<void> {
+    const db = await this.openDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.quickAddStoreName], "readwrite")
+      const store = transaction.objectStore(this.quickAddStoreName)
+      const request = store.add(option)
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve()
+    })
+  }
+
+  async updateQuickAddOption(option: QuickAddOption): Promise<void> {
+    const db = await this.openDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.quickAddStoreName], "readwrite")
+      const store = transaction.objectStore(this.quickAddStoreName)
+      const request = store.put(option)
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve()
+    })
+  }
+
+  async deleteQuickAddOption(id: string): Promise<void> {
+    const db = await this.openDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.quickAddStoreName], "readwrite")
+      const store = transaction.objectStore(this.quickAddStoreName)
+      const request = store.delete(id)
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => resolve()
+    })
+  }
+
+  async initializeDefaultQuickAddOptions(): Promise<void> {
+    const existingOptions = await this.getAllQuickAddOptions()
+    if (existingOptions.length > 0) return // Already initialized
+
+    const defaultOptions: Omit<QuickAddOption, "id" | "createdAt">[] = [
+      {
+        icon: "Coffee",
+        label: "Coffee",
+        amount: 5,
+        category: "Food & Dining",
+        description: "Coffee",
+        order: 0,
+      },
+      {
+        icon: "Utensils",
+        label: "Lunch",
+        amount: 15,
+        category: "Food & Dining",
+        description: "Lunch",
+        order: 1,
+      },
+      {
+        icon: "Car",
+        label: "Gas",
+        amount: 50,
+        category: "Transportation",
+        description: "Gas",
+        order: 2,
+      },
+      {
+        icon: "ShoppingBag",
+        label: "Groceries",
+        amount: 80,
+        category: "Shopping",
+        description: "Groceries",
+        order: 3,
+      },
+      {
+        icon: "Zap",
+        label: "Utilities",
+        amount: 120,
+        category: "Bills & Utilities",
+        description: "Utilities",
+        order: 4,
+      },
+    ]
+
+    for (const option of defaultOptions) {
+      await this.addQuickAddOption({
+        ...option,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      })
+    }
   }
 }
 
