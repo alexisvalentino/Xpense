@@ -1,7 +1,7 @@
 "use client"
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
-import type { Expense } from "@/app/page"
+import type { Expense } from "@/lib/db"
 import { getCategoryColor } from "@/lib/category-colors"
 
 interface ExpenseChartProps {

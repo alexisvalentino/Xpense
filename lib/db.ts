@@ -466,6 +466,37 @@ class ExpenseDB {
       })
     }
   }
+
+  async clearAllQuickAddOptions(): Promise<void> {
+    const db = await this.openDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.quickAddStoreName], "readwrite")
+      const store = transaction.objectStore(this.quickAddStoreName)
+      const request = store.clear()
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => {
+        // Store a flag in localStorage to indicate user has cleared all options
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('quickAddOptionsCleared', 'true')
+        }
+        resolve()
+      }
+    })
+  }
+
+  async hasUserClearedOptions(): Promise<boolean> {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('quickAddOptionsCleared') === 'true'
+    }
+    return false
+  }
+
+  async resetClearedOptionsFlag(): Promise<void> {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('quickAddOptionsCleared')
+    }
+  }
 }
 
 export const expenseDB = new ExpenseDB()

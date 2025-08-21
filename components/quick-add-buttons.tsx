@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus } from "lucide-react"
+import { Plus, Coffee, Utensils, Car, ShoppingBag, Zap, Home, Heart, Gamepad2, BookOpen, Plane, Train, Bus, Bike, Wifi, Phone, Tv, Music, Camera, Gift, Star } from "lucide-react"
+import { QuickAddSkeleton } from "@/components/ui/skeleton-loaders"
 import type { Expense } from "@/lib/db"
 import type { QuickAddOption } from "@/lib/db"
-import { getQuickAddOptions } from "@/lib/quick-add-utils"
+import { getQuickAddOptionsWithSmartDefaults } from "@/lib/quick-add-utils"
 import { QuickAddEditModal } from "./quick-add-edit-modal"
 
 interface QuickAddButtonsProps {
@@ -17,6 +18,33 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
   const [options, setOptions] = useState<QuickAddOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Icon mapping for quick add options
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, React.ComponentType<any>> = {
+      Coffee,
+      Utensils,
+      Car,
+      ShoppingBag,
+      Zap,
+      Home,
+      Heart,
+      Gamepad2,
+      BookOpen,
+      Plane,
+      Train,
+      Bus,
+      Bike,
+      Wifi,
+      Phone,
+      Tv,
+      Music,
+      Camera,
+      Gift,
+      Star,
+    }
+    return iconMap[iconName] || Plus
+  }
+
   useEffect(() => {
     loadOptions()
   }, [])
@@ -24,7 +52,7 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
   const loadOptions = async () => {
     try {
       setIsLoading(true)
-      const loadedOptions = await getQuickAddOptions()
+      const loadedOptions = await getQuickAddOptionsWithSmartDefaults()
       setOptions(loadedOptions)
     } catch (error) {
       console.error("Error loading quick add options:", error)
@@ -47,29 +75,15 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
   }
 
   if (isLoading) {
-    return (
-      <Card className="glass">
-        <CardHeader className="pb-3 md:pb-4">
-          <CardTitle className="flex items-center justify-between text-base md:text-lg">
-            <div className="flex items-center space-x-2">
-              <Plus className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
-              <span>Quick Add</span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-3 md:p-6">
-          <div className="text-center text-muted-foreground">Loading...</div>
-        </CardContent>
-      </Card>
-    )
+    return <QuickAddSkeleton />
   }
 
   return (
     <Card className="glass">
-      <CardHeader className="pb-3 md:pb-4">
-        <CardTitle className="flex items-center justify-between text-base md:text-lg">
-          <div className="flex items-center space-x-2">
-            <Plus className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
+      <CardHeader className="pb-4 md:pb-6">
+        <CardTitle className="flex items-center justify-between text-lg md:text-xl font-bold">
+          <div className="flex items-center space-x-3">
+            <Plus className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
             <span>Quick Add</span>
           </div>
           <QuickAddEditModal onOptionsChange={handleOptionsChange} />
@@ -77,54 +91,76 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
       </CardHeader>
       <CardContent className="p-3 md:p-6">
         {options.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
-            <p>No quick add options configured</p>
-            <p className="text-sm">Click the settings icon to add your first option</p>
+          <div className="text-center py-12">
+            <div className="space-y-6">
+              <Button 
+                onClick={() => {
+                  // Trigger the edit modal to open
+                  const settingsButton = document.querySelector('[data-settings-trigger]') as HTMLButtonElement
+                  if (settingsButton) {
+                    settingsButton.click()
+                  }
+                }}
+                className="h-20 w-20 mx-auto rounded-full bg-secondary/20 hover:bg-secondary/30 flex items-center justify-center transition-all duration-200 hover:scale-110 border-2 border-secondary/30 hover:border-secondary/50"
+              >
+                <Plus className="h-10 w-10 text-secondary" />
+              </Button>
+              <div className="space-y-2">
+                <div className="text-muted-foreground">
+                  <p className="text-lg font-medium">No quick add options configured</p>
+                  <p className="text-base">Click the plus icon to create your first quick add option</p>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <>
             {/* Mobile: Horizontal scrollable list */}
             <div className="md:hidden">
-              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-                {options.slice(0, 5).map((option) => (
-                  <Button
-                    key={option.id}
-                    onClick={() => handleQuickAdd(option)}
-                    variant="outline"
-                    className="glass bg-transparent flex flex-col items-center space-y-2 h-auto py-3 px-4 min-w-[80px] hover:bg-secondary/10 flex-shrink-0"
-                  >
-                    <div className="h-4 w-4 text-secondary">
-                      {/* Icon placeholder - you can map icons here if needed */}
-                      <Plus className="h-4 w-4" />
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs font-medium">{option.label}</div>
-                      <div className="text-xs text-muted-foreground">${option.amount}</div>
-                    </div>
-                  </Button>
-                ))}
+              <div className="flex space-x-4 overflow-x-auto pb-3 scrollbar-hide">
+                {options.slice(0, 5).map((option) => {
+                  const IconComponent = getIconComponent(option.icon)
+                  return (
+                    <Button
+                      key={option.id}
+                      onClick={() => handleQuickAdd(option)}
+                      variant="outline"
+                      className="glass bg-transparent flex flex-col items-center space-y-3 h-auto py-4 px-5 min-w-[90px] hover:bg-secondary/10 flex-shrink-0 rounded-xl transition-all duration-200 hover:scale-105"
+                    >
+                      <div className="h-5 w-5 text-secondary">
+                        <IconComponent className="h-5 w-5" />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-semibold">{option.label}</div>
+                        <div className="text-xs text-muted-foreground">${option.amount}</div>
+                      </div>
+                    </Button>
+                  )
+                })}
               </div>
             </div>
 
             {/* Desktop: Grid layout */}
-            <div className="hidden md:grid md:grid-cols-5 gap-3">
-              {options.slice(0, 5).map((option) => (
-                <Button
-                  key={option.id}
-                  onClick={() => handleQuickAdd(option)}
-                  variant="outline"
-                  className="glass bg-transparent flex flex-col items-center space-y-2 h-auto py-4 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-                >
-                  <div className="h-5 w-5 text-secondary">
-                    {/* Icon placeholder - you can map icons here if needed */}
-                    <Plus className="h-5 w-5" />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm font-medium">{option.label}</div>
-                    <div className="text-xs text-muted-foreground">${option.amount}</div>
-                  </div>
-                </Button>
-              ))}
+            <div className="hidden md:grid md:grid-cols-5 gap-4">
+              {options.slice(0, 5).map((option) => {
+                const IconComponent = getIconComponent(option.icon)
+                return (
+                  <Button
+                    key={option.id}
+                    onClick={() => handleQuickAdd(option)}
+                    variant="outline"
+                    className="glass bg-transparent flex flex-col items-center space-y-3 h-auto py-6 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl"
+                  >
+                    <div className="h-6 w-6 text-secondary">
+                      <IconComponent className="h-6 w-6" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-semibold">{option.label}</div>
+                      <div className="text-xs text-muted-foreground">${option.amount}</div>
+                    </div>
+                  </Button>
+                )
+              })}
             </div>
           </>
         )}

@@ -15,17 +15,23 @@ import {
   ArrowDown,
   Minus,
 } from "lucide-react"
-import type { Expense } from "@/app/page"
+import type { Expense } from "@/lib/db"
 import { calculateAnalytics, getInsightMessage } from "@/lib/analytics-utils"
 import { getCategoryColor } from "@/lib/category-colors"
+import { AnalyticsSkeleton } from "@/components/ui/skeleton-loaders"
 
 interface AnalyticsDashboardProps {
   expenses: Expense[]
+  isLoading?: boolean
 }
 
-export function AnalyticsDashboard({ expenses }: AnalyticsDashboardProps) {
+export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDashboardProps) {
   const analytics = useMemo(() => calculateAnalytics(expenses), [expenses])
   const insights = useMemo(() => getInsightMessage(analytics), [analytics])
+
+  if (isLoading) {
+    return <AnalyticsSkeleton />
+  }
 
   if (expenses.length === 0) {
     return (

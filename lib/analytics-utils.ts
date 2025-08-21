@@ -1,4 +1,4 @@
-import type { Expense } from "@/app/page"
+import type { Expense } from "@/lib/db"
 
 export interface SpendingTrend {
   period: string

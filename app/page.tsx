@@ -15,6 +15,7 @@ import { RecurringExpenses } from "@/components/recurring-expenses"
 import { DataExport } from "@/components/data-export"
 import { ResponsiveNavigation } from "@/components/responsive-navigation"
 import { ResponsiveHeader } from "@/components/responsive-header"
+import { MainPageSkeleton } from "@/components/ui/skeleton-loaders"
 import { expenseDB, type Expense, type Budget, type RecurringExpense } from "@/lib/db"
 import { calculateBudgetProgress } from "@/lib/budget-utils"
 import { filterExpenses, hasActiveFilters, getFilteredTotal, sortExpenses } from "@/lib/expense-utils"
@@ -232,14 +233,7 @@ export default function ExpenseTracker() {
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary mx-auto"></div>
-          <p className="text-muted-foreground">Loading your expenses...</p>
-        </div>
-      </div>
-    )
+    return <MainPageSkeleton />
   }
 
   return (
@@ -256,11 +250,11 @@ export default function ExpenseTracker() {
           <ResponsiveHeader />
 
           {activeTab === "budgets" ? (
-            <BudgetManagement expenses={expenses} />
+            <BudgetManagement expenses={expenses} isLoading={isLoading} />
           ) : activeTab === "analytics" ? (
-            <AnalyticsDashboard expenses={expenses} />
+            <AnalyticsDashboard expenses={expenses} isLoading={isLoading} />
           ) : activeTab === "recurring" ? (
-            <RecurringExpenses onAddExpense={addExpense} />
+            <RecurringExpenses onAddExpense={addExpense} isLoading={isLoading} />
           ) : activeTab === "export" ? (
             <DataExport expenses={expenses} budgets={budgets} recurring={recurringExpenses} />
           ) : (
@@ -347,14 +341,15 @@ export default function ExpenseTracker() {
                     <CardTitle className="flex items-center space-x-2 text-base md:text-lg">
                       <Calendar className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
                                               <span>Recent Expenses</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-2 md:p-6">
-                      <ExpenseList
-                        expenses={filteredExpenses.slice(0, 10)}
-                        onDelete={deleteExpense}
-                        onEdit={handleEdit}
-                      />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2 md:p-6">
+                    <ExpenseList
+                      expenses={filteredExpenses.slice(0, 10)}
+                      onDelete={deleteExpense}
+                      onEdit={handleEdit}
+                      isLoading={isLoading}
+                    />
                   </CardContent>
                 </Card>
               )}

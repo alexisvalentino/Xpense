@@ -10,14 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { BudgetCardSkeleton } from "@/components/ui/skeleton-loaders"
 import { Plus, Target, Edit, Trash2, AlertTriangle, CheckCircle } from "lucide-react"
 import { expenseDB, type Budget } from "@/lib/db"
-import type { Expense } from "@/app/page"
+import type { Expense } from "@/lib/db"
 import { getCategoryColor } from "@/lib/category-colors"
 import { calculateBudgetProgress, getBudgetStatusColor, formatPeriod, type BudgetProgress } from "@/lib/budget-utils"
 
 interface BudgetManagementProps {
   expenses: Expense[]
+  isLoading?: boolean
 }
 
 const categories = [
@@ -32,7 +34,7 @@ const categories = [
   "Other",
 ]
 
-export function BudgetManagement({ expenses }: BudgetManagementProps) {
+export function BudgetManagement({ expenses, isLoading: externalLoading }: BudgetManagementProps) {
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [budgetProgress, setBudgetProgress] = useState<BudgetProgress[]>([])
   const [showForm, setShowForm] = useState(false)
@@ -127,14 +129,13 @@ export function BudgetManagement({ expenses }: BudgetManagementProps) {
     )
   }
 
-  if (isLoading) {
+  if (isLoading || externalLoading) {
     return (
-      <Card className="glass">
-        <CardContent className="p-6 text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-secondary mx-auto"></div>
-          <p className="text-sm text-muted-foreground mt-2">Loading budgets...</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <BudgetCardSkeleton key={i} />
+        ))}
+      </div>
     )
   }
 

@@ -44,6 +44,39 @@ export const categoryOptions = [
 // Get all quick add options
 export async function getQuickAddOptions(): Promise<QuickAddOption[]> {
   try {
+    return await expenseDB.getAllQuickAddOptions()
+  } catch (error) {
+    console.error("Error getting quick add options:", error)
+    return []
+  }
+}
+
+// Get quick add options with smart defaults initialization
+export async function getQuickAddOptionsWithSmartDefaults(): Promise<QuickAddOption[]> {
+  try {
+    const options = await expenseDB.getAllQuickAddOptions()
+    
+    // If no options exist, check if user has explicitly cleared them
+    if (options.length === 0) {
+      const hasUserCleared = await expenseDB.hasUserClearedOptions()
+      
+      // Only initialize defaults if user hasn't explicitly cleared them
+      if (!hasUserCleared) {
+        await expenseDB.initializeDefaultQuickAddOptions()
+        return await expenseDB.getAllQuickAddOptions()
+      }
+    }
+    
+    return options
+  } catch (error) {
+    console.error("Error getting quick add options:", error)
+    return []
+  }
+}
+
+// Get quick add options with defaults initialization (for first time users)
+export async function getQuickAddOptionsWithDefaults(): Promise<QuickAddOption[]> {
+  try {
     await expenseDB.initializeDefaultQuickAddOptions()
     return await expenseDB.getAllQuickAddOptions()
   } catch (error) {
@@ -61,6 +94,8 @@ export async function addQuickAddOption(option: Omit<QuickAddOption, "id" | "cre
       createdAt: new Date().toISOString(),
     }
     await expenseDB.addQuickAddOption(newOption)
+    // Reset the cleared flag when user adds a new option
+    await expenseDB.resetClearedOptionsFlag()
   } catch (error) {
     console.error("Error adding quick add option:", error)
     throw error
@@ -101,3 +136,25 @@ export async function reorderQuickAddOptions(options: QuickAddOption[]): Promise
     throw error
   }
 }
+
+// Clear all quick add options
+export async function clearAllQuickAddOptions(): Promise<void> {
+  try {
+    await expenseDB.clearAllQuickAddOptions()
+  } catch (error) {
+    console.error("Error clearing quick add options:", error)
+    throw error
+  }
+}
+
+// For testing: Reset the cleared flag (useful for development)
+export async function resetQuickAddDefaults(): Promise<void> {
+  try {
+    await expenseDB.resetClearedOptionsFlag()
+  } catch (error) {
+    console.error("Error resetting quick add defaults:", error)
+    throw error
+  }
+}
+
+

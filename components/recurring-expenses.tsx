@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
+import { RecurringExpenseSkeleton } from "@/components/ui/skeleton-loaders"
 import { Plus, Repeat, Edit, Trash2, Clock } from "lucide-react"
 import { expenseDB, type RecurringExpense, type Expense } from "@/lib/db"
 import { getCategoryColor } from "@/lib/category-colors"
 
 interface RecurringExpensesProps {
   onAddExpense: (expense: Omit<Expense, "id">) => void
+  isLoading?: boolean
 }
 
 const categories = [
@@ -30,7 +32,7 @@ const categories = [
   "Other",
 ]
 
-export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
+export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: RecurringExpensesProps) {
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingRecurring, setEditingRecurring] = useState<RecurringExpense | null>(null)
@@ -182,14 +184,13 @@ export function RecurringExpenses({ onAddExpense }: RecurringExpensesProps) {
     return { status: "future", text: `Due in ${diffDays} days`, color: "outline" }
   }
 
-  if (isLoading) {
+  if (isLoading || externalLoading) {
     return (
-      <Card className="glass">
-        <CardContent className="p-6 text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-secondary mx-auto"></div>
-          <p className="text-sm text-muted-foreground mt-2">Loading recurring expenses...</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <RecurringExpenseSkeleton key={i} />
+        ))}
+      </div>
     )
   }
 

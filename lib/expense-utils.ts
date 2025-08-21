@@ -1,4 +1,4 @@
-import type { Expense } from "@/app/page"
+import type { Expense } from "@/lib/db"
 import type { FilterOptions } from "@/components/expense-filters"
 
 export function filterExpenses(expenses: Expense[], filters: FilterOptions): Expense[] {

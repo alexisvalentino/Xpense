@@ -2,16 +2,28 @@
 
 import { Button } from "@/components/ui/button"
 import { Trash2, Edit, Calendar, Tag } from "lucide-react"
-import type { Expense } from "@/app/page"
+import type { Expense } from "@/lib/db"
 import { getCategoryColor } from "@/lib/category-colors"
+import { ExpenseCardSkeleton } from "@/components/ui/skeleton-loaders"
 
 interface ExpenseListProps {
   expenses: Expense[]
   onDelete: (id: string) => void
   onEdit: (expense: Expense) => void
+  isLoading?: boolean
 }
 
-export function ExpenseList({ expenses, onDelete, onEdit }: ExpenseListProps) {
+export function ExpenseList({ expenses, onDelete, onEdit, isLoading = false }: ExpenseListProps) {
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <ExpenseCardSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
       {expenses.map((expense) => (
