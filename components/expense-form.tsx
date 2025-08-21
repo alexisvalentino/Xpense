@@ -66,69 +66,81 @@ export function ExpenseForm({ onSubmit, onCancel, editExpense }: ExpenseFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
-        <Input
-          id="amount"
-          type="number"
-          step="0.01"
-          placeholder="0.00"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="glass"
-          required
-        />
+    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+      {/* Amount and Category Row - Mobile: Stacked, Desktop: Side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="amount" className="text-sm font-medium">Amount</Label>
+          <Input
+            id="amount"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="glass h-11 text-base"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="category" className="text-sm font-medium">Category</Label>
+          <Select value={category} onValueChange={setCategory} required>
+            <SelectTrigger className="glass h-11 text-base">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent className="glass-dropdown max-h-60">
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat} className="glass-dropdown-item">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(cat) }} />
+                    {cat}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
-        <Select value={category} onValueChange={setCategory} required>
-          <SelectTrigger className="glass">
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent className="glass-dropdown">
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat} className="glass-dropdown-item">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(cat) }} />
-                  {cat}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-sm font-medium">Description</Label>
         <Textarea
           id="description"
           placeholder="What did you spend on?"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="glass"
+          className="glass min-h-[80px] text-base resize-none"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date" className="text-sm font-medium">Date</Label>
         <Input
           id="date"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="glass"
+          className="glass h-11 text-base"
           required
         />
       </div>
 
-      <div className="flex space-x-2 pt-4">
-        <Button type="submit" className="flex-1 bg-secondary hover:bg-secondary/90">
+      {/* Action Buttons - Mobile: Stacked, Desktop: Side by side */}
+      <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-4">
+        <Button 
+          type="submit" 
+          className="flex-1 bg-secondary hover:bg-secondary/90 h-11 text-base font-medium"
+        >
           {editExpense ? "Update Expense" : "Add Expense"}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="flex-1 glass bg-transparent">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel} 
+          className="flex-1 glass bg-transparent h-11 text-base font-medium"
+        >
           Cancel
         </Button>
       </div>
