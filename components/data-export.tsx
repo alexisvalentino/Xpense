@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Download, FileText, FileSpreadsheet, Printer, Upload } from "lucide-react"
+import { Download, FileText, FileSpreadsheet, Printer, Upload, Trash2 } from "lucide-react"
 import type { Expense, Budget, RecurringExpense } from "@/lib/db"
 import { expenseDB } from "@/lib/db"
 import { calculateAnalytics } from "@/lib/analytics-utils"
@@ -16,6 +16,14 @@ import {
   generateCSV,
   generateBudgetCSV,
   generateRecurringCSV,
+  generateImportableExpensesCSV,
+  generateImportableBudgetsCSV,
+  generateImportableRecurringCSV,
+  generateImportableQuickAddCSV,
+  parseExpensesFromCSV,
+  parseBudgetsFromCSV,
+  parseRecurringFromCSV,
+  parseQuickAddFromCSV,
   generateReportHTML,
   downloadFile,
   printReport,
@@ -62,18 +70,18 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
       switch (type) {
         case "expenses":
           const filteredExpenses = getFilteredExpenses()
-          const csvContent = generateCSV(filteredExpenses)
-          downloadFile(csvContent, `expenses-${timestamp}.csv`, "text/csv")
+          const csvContent = generateImportableExpensesCSV(filteredExpenses)
+          downloadFile(csvContent, `expenses-importable-${timestamp}.csv`, "text/csv")
           break
 
         case "budgets":
-          const budgetCSV = generateBudgetCSV(budgets)
-          downloadFile(budgetCSV, `budgets-${timestamp}.csv`, "text/csv")
+          const budgetCSV = generateImportableBudgetsCSV(budgets)
+          downloadFile(budgetCSV, `budgets-importable-${timestamp}.csv`, "text/csv")
           break
 
         case "recurring":
-          const recurringCSV = generateRecurringCSV(recurring)
-          downloadFile(recurringCSV, `recurring-expenses-${timestamp}.csv`, "text/csv")
+          const recurringCSV = generateImportableRecurringCSV(recurring)
+          downloadFile(recurringCSV, `recurring-expenses-importable-${timestamp}.csv`, "text/csv")
           break
 
         case "all":
@@ -81,6 +89,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             expenses: getFilteredExpenses(),
             budgets,
             recurring,
+            quickAdd: await expenseDB.getAllQuickAddOptions(),
           }
           const jsonContent = JSON.stringify(allData, null, 2)
           downloadFile(jsonContent, `expense-data-${timestamp}.json`, "application/json")
@@ -134,34 +143,144 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
     setIsExporting(true)
     try {
       const content = await file.text()
-      const data = JSON.parse(content)
+      let importedCount = 0
 
-      // Import expenses
-      if (data.expenses && Array.isArray(data.expenses)) {
-        for (const expense of data.expenses) {
-          await expenseDB.addExpense(expense)
+      // Check if it's a JSON file (contains expenses, budgets, etc.)
+      if (content.trim().startsWith('{')) {
+        try {
+          const data = JSON.parse(content)
+
+          // Import expenses
+          if (data.expenses && Array.isArray(data.expenses)) {
+            for (const expense of data.expenses) {
+              try {
+                await expenseDB.addExpense(expense)
+                importedCount++
+              } catch (error) {
+                console.warn("Failed to import expense:", expense, error)
+              }
+            }
+          }
+
+          // Import budgets
+          if (data.budgets && Array.isArray(data.budgets)) {
+            for (const budget of data.budgets) {
+              try {
+                await expenseDB.addBudget(budget)
+                importedCount++
+              } catch (error) {
+                console.warn("Failed to import budget:", budget, error)
+              }
+            }
+          }
+
+          // Import recurring expenses
+          if (data.recurring && Array.isArray(data.recurring)) {
+            for (const recurring of data.recurring) {
+              try {
+                await expenseDB.addRecurringExpense(recurring)
+                importedCount++
+              } catch (error) {
+                console.warn("Failed to import recurring expense:", recurring, error)
+              }
+            }
+          }
+
+          // Import quick add options
+          if (data.quickAdd && Array.isArray(data.quickAdd)) {
+            for (const quickAdd of data.quickAdd) {
+              try {
+                await expenseDB.addQuickAddOption(quickAdd)
+                importedCount++
+              } catch (error) {
+                console.warn("Failed to import quick add option:", quickAdd, error)
+              }
+            }
+          }
+        } catch (jsonError) {
+          throw new Error("Invalid JSON format")
+        }
+      } else {
+        // Handle CSV files
+        const fileName = file.name.toLowerCase()
+        
+        if (fileName.includes('expenses') || fileName.includes('expense')) {
+          const expenses = parseExpensesFromCSV(content)
+          for (const expense of expenses) {
+            try {
+              await expenseDB.addExpense(expense)
+              importedCount++
+            } catch (error) {
+              console.warn("Failed to import expense:", expense, error)
+            }
+          }
+        } else if (fileName.includes('budget')) {
+          const budgets = parseBudgetsFromCSV(content)
+          for (const budget of budgets) {
+            try {
+              await expenseDB.addBudget(budget)
+              importedCount++
+            } catch (error) {
+              console.warn("Failed to import budget:", budget, error)
+            }
+          }
+        } else if (fileName.includes('recurring')) {
+          const recurring = parseRecurringFromCSV(content)
+          for (const recurringExpense of recurring) {
+            try {
+              await expenseDB.addRecurringExpense(recurringExpense)
+              importedCount++
+            } catch (error) {
+              console.warn("Failed to import recurring expense:", recurringExpense, error)
+            }
+          }
+        } else if (fileName.includes('quick') || fileName.includes('quickadd')) {
+          const quickAdd = parseQuickAddFromCSV(content)
+          for (const quickAddOption of quickAdd) {
+            try {
+              await expenseDB.addQuickAddOption(quickAddOption)
+              importedCount++
+            } catch (error) {
+              console.warn("Failed to import quick add option:", quickAddOption, error)
+            }
+          }
+        } else {
+          throw new Error("Unrecognized CSV file type. Please use files exported from this app.")
         }
       }
 
-      // Import budgets
-      if (data.budgets && Array.isArray(data.budgets)) {
-        for (const budget of data.budgets) {
-          await expenseDB.addBudget(budget)
-        }
-      }
-
-      // Import recurring expenses
-      if (data.recurring && Array.isArray(data.recurring)) {
-        for (const recurring of data.recurring) {
-          await expenseDB.addRecurringExpense(recurring)
-        }
-      }
-
+      // Show success message
+      alert(`Successfully imported ${importedCount} items! The page will refresh to show your data.`)
+      
       // Refresh the page to show imported data
       window.location.reload()
     } catch (error) {
       console.error("Import failed:", error)
-      alert("Failed to import data. Please check the file format.")
+      alert(`Failed to import data: ${error.message}. Please check the file format and try again.`)
+    } finally {
+      setIsExporting(false)
+      // Reset file input
+      event.target.value = ""
+    }
+  }
+
+  const handleClearAllData = async () => {
+    if (!confirm("⚠️ WARNING: This will permanently delete ALL your data including expenses, budgets, recurring expenses, and quick add options. This action cannot be undone. Are you sure you want to continue?")) {
+      return
+    }
+
+    if (!confirm("Are you absolutely sure? This will delete everything and cannot be recovered.")) {
+      return
+    }
+
+    setIsExporting(true)
+    try {
+      await expenseDB.clearAllData()
+      alert("All data has been cleared. The page will refresh.")
+      window.location.reload()
+    } catch (error) {
+      console.error("Failed to clear data:", error)
+      alert("Failed to clear data. Please try again.")
     } finally {
       setIsExporting(false)
     }
@@ -183,14 +302,14 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             <p className="text-sm text-muted-foreground">Select a date range for your reports and exports</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {Object.entries(datePresets).map(([key, preset]) => (
               <Button
                 key={key}
                 onClick={() => handlePresetSelect(key)}
                 variant="outline"
                 size="sm"
-                className="glass bg-transparent"
+                className="glass bg-transparent rounded-full py-2 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
               >
                 {preset.label}
               </Button>
@@ -231,41 +350,41 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              onClick={() => handleExportCSV("expenses")}
-              disabled={isExporting}
-              variant="outline"
-              className="glass bg-transparent justify-start"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Export Expenses (CSV)
-            </Button>
+                         <Button
+               onClick={() => handleExportCSV("expenses")}
+               disabled={isExporting}
+               variant="outline"
+               className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
+             >
+               <FileSpreadsheet className="h-4 w-4 mr-2" />
+               Export Expenses (Importable CSV)
+             </Button>
 
-            <Button
-              onClick={() => handleExportCSV("budgets")}
-              disabled={isExporting}
-              variant="outline"
-              className="glass bg-transparent justify-start"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Export Budgets (CSV)
-            </Button>
+             <Button
+               onClick={() => handleExportCSV("budgets")}
+               disabled={isExporting}
+               variant="outline"
+               className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
+             >
+               <FileSpreadsheet className="h-4 w-4 mr-2" />
+               Export Budgets (Importable CSV)
+             </Button>
 
-            <Button
-              onClick={() => handleExportCSV("recurring")}
-              disabled={isExporting}
-              variant="outline"
-              className="glass bg-transparent justify-start"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Export Recurring (CSV)
-            </Button>
+             <Button
+               onClick={() => handleExportCSV("recurring")}
+               disabled={isExporting}
+               variant="outline"
+               className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
+             >
+               <FileSpreadsheet className="h-4 w-4 mr-2" />
+               Export Recurring (Importable CSV)
+             </Button>
 
             <Button
               onClick={() => handleExportCSV("all")}
               disabled={isExporting}
               variant="outline"
-              className="glass bg-transparent justify-start"
+              className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
             >
               <Download className="h-4 w-4 mr-2" />
               Export All Data (JSON)
@@ -286,7 +405,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             <Button
               onClick={() => handleGenerateReport("download")}
               disabled={isExporting}
-              className="bg-secondary hover:bg-secondary/90 justify-start"
+              className="bg-secondary hover:bg-secondary/90 justify-start rounded-xl py-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             >
               <FileText className="h-4 w-4 mr-2" />
               Download HTML Report
@@ -296,7 +415,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
               onClick={() => handleGenerateReport("print")}
               disabled={isExporting}
               variant="outline"
-              className="glass bg-transparent justify-start"
+              className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
             >
               <Printer className="h-4 w-4 mr-2" />
               Print Report
@@ -308,16 +427,42 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
         {/* Import Data */}
         <div className="space-y-4">
+                     <div>
+             <Label className="text-base font-medium">Import Data</Label>
+             <p className="text-sm text-muted-foreground">Import previously exported data (JSON or CSV format)</p>
+           </div>
+
+                     <div className="flex items-center space-x-4">
+             <Input type="file" accept=".json,.csv" onChange={handleImportData} disabled={isExporting} className="glass rounded-xl" />
+             <Button 
+               disabled={isExporting} 
+               variant="outline" 
+               className="glass bg-transparent rounded-xl px-6 py-2 hover:bg-secondary/10 transition-all duration-200"
+             >
+               <Upload className="h-4 w-4 mr-2" />
+               Import
+             </Button>
+           </div>
+        </div>
+
+        <Separator />
+
+        {/* Data Management */}
+        <div className="space-y-4">
           <div>
-            <Label className="text-base font-medium">Import Data</Label>
-            <p className="text-sm text-muted-foreground">Import previously exported data (JSON format)</p>
+            <Label className="text-base font-medium">Data Management</Label>
+            <p className="text-sm text-muted-foreground">Manage your data storage</p>
           </div>
 
           <div className="flex items-center space-x-4">
-            <Input type="file" accept=".json" onChange={handleImportData} disabled={isExporting} className="glass" />
-            <Button disabled={isExporting} variant="outline" className="glass bg-transparent">
-              <Upload className="h-4 w-4 mr-2" />
-              Import
+            <Button 
+              onClick={handleClearAllData}
+              disabled={isExporting}
+              variant="outline" 
+              className="glass bg-transparent text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl px-6 py-2 transition-all duration-200"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear All Data
             </Button>
           </div>
         </div>

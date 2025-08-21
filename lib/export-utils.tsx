@@ -1,4 +1,4 @@
-import type { Expense, Budget, RecurringExpense } from "./db"
+import type { Expense, Budget, RecurringExpense, QuickAddOption } from "./db"
 import type { AnalyticsData } from "./analytics-utils"
 
 export interface ReportData {
@@ -13,6 +13,7 @@ export interface ReportData {
   generatedAt: string
 }
 
+// Export functions for viewing (existing)
 export function generateCSV(expenses: Expense[]): string {
   const headers = ["Date", "Description", "Amount", "Category"]
   const rows = expenses.map((expense) => [
@@ -26,8 +27,8 @@ export function generateCSV(expenses: Expense[]): string {
 }
 
 export function generateBudgetCSV(budgets: Budget[]): string {
-  const headers = ["Category", "Amount", "Period", "Created Date"]
-  const rows = budgets.map((budget) => [budget.category, budget.amount.toString(), budget.period, budget.createdAt])
+  const headers = ["Category", "Limit", "Period", "Created Date"]
+  const rows = budgets.map((budget) => [budget.category, budget.limit.toString(), budget.period, budget.createdAt])
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
 }
@@ -44,6 +45,193 @@ export function generateRecurringCSV(recurring: RecurringExpense[]): string {
   ])
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+}
+
+// New functions for importable CSV exports
+export function generateImportableExpensesCSV(expenses: Expense[]): string {
+  const headers = ["id", "date", "description", "amount", "category"]
+  const rows = expenses.map((expense) => [
+    expense.id,
+    expense.date,
+    `"${expense.description.replace(/"/g, '""')}"`,
+    expense.amount.toString(),
+    expense.category,
+  ])
+
+  return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+}
+
+export function generateImportableBudgetsCSV(budgets: Budget[]): string {
+  const headers = ["id", "category", "limit", "period", "createdAt"]
+  const rows = budgets.map((budget) => [
+    budget.id,
+    budget.category,
+    budget.limit.toString(),
+    budget.period,
+    budget.createdAt,
+  ])
+
+  return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+}
+
+export function generateImportableRecurringCSV(recurring: RecurringExpense[]): string {
+  const headers = ["id", "description", "amount", "category", "frequency", "nextDue", "isActive", "createdAt"]
+  const rows = recurring.map((expense) => [
+    expense.id,
+    `"${expense.description.replace(/"/g, '""')}"`,
+    expense.amount.toString(),
+    expense.category,
+    expense.frequency,
+    expense.nextDue,
+    expense.isActive.toString(),
+    expense.createdAt,
+  ])
+
+  return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+}
+
+export function generateImportableQuickAddCSV(quickAdd: QuickAddOption[]): string {
+  const headers = ["id", "label", "amount", "category", "description", "order", "createdAt"]
+  const rows = quickAdd.map((option) => [
+    option.id,
+    `"${option.label.replace(/"/g, '""')}"`,
+    option.amount.toString(),
+    option.category,
+    `"${option.description.replace(/"/g, '""')}"`,
+    option.order.toString(),
+    option.createdAt,
+  ])
+
+  return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+}
+
+// CSV parsing functions for import
+export function parseCSV(csvContent: string): string[][] {
+  const lines = csvContent.trim().split('\n')
+  return lines.map(line => {
+    const result = []
+    let current = ''
+    let inQuotes = false
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i]
+      
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"'
+          i++ // Skip next quote
+        } else {
+          inQuotes = !inQuotes
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current)
+        current = ''
+      } else {
+        current += char
+      }
+    }
+    
+    result.push(current)
+    return result
+  })
+}
+
+export function parseExpensesFromCSV(csvContent: string): Expense[] {
+  const rows = parseCSV(csvContent)
+  if (rows.length < 2) return []
+  
+  const headers = rows[0]
+  const dataRows = rows.slice(1)
+  
+  return dataRows.map(row => {
+    const expense: any = {}
+    headers.forEach((header, index) => {
+      expense[header] = row[index]
+    })
+    
+    return {
+      id: expense.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      date: expense.date,
+      description: expense.description,
+      amount: parseFloat(expense.amount) || 0,
+      category: expense.category,
+      createdAt: expense.createdAt || new Date().toISOString(),
+    } as Expense
+  })
+}
+
+export function parseBudgetsFromCSV(csvContent: string): Budget[] {
+  const rows = parseCSV(csvContent)
+  if (rows.length < 2) return []
+  
+  const headers = rows[0]
+  const dataRows = rows.slice(1)
+  
+  return dataRows.map(row => {
+    const budget: any = {}
+    headers.forEach((header, index) => {
+      budget[header] = row[index]
+    })
+    
+    return {
+      id: budget.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      category: budget.category,
+      limit: parseFloat(budget.limit) || 0,
+      period: budget.period || 'monthly',
+      createdAt: budget.createdAt || new Date().toISOString(),
+    } as Budget
+  })
+}
+
+export function parseRecurringFromCSV(csvContent: string): RecurringExpense[] {
+  const rows = parseCSV(csvContent)
+  if (rows.length < 2) return []
+  
+  const headers = rows[0]
+  const dataRows = rows.slice(1)
+  
+  return dataRows.map(row => {
+    const recurring: any = {}
+    headers.forEach((header, index) => {
+      recurring[header] = row[index]
+    })
+    
+    return {
+      id: recurring.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      description: recurring.description,
+      amount: parseFloat(recurring.amount) || 0,
+      category: recurring.category,
+      frequency: recurring.frequency || 'monthly',
+      nextDue: recurring.nextDue || new Date().toISOString().split('T')[0],
+      isActive: recurring.isActive === 'true',
+      createdAt: recurring.createdAt || new Date().toISOString(),
+    } as RecurringExpense
+  })
+}
+
+export function parseQuickAddFromCSV(csvContent: string): QuickAddOption[] {
+  const rows = parseCSV(csvContent)
+  if (rows.length < 2) return []
+  
+  const headers = rows[0]
+  const dataRows = rows.slice(1)
+  
+  return dataRows.map(row => {
+    const quickAdd: any = {}
+    headers.forEach((header, index) => {
+      quickAdd[header] = row[index]
+    })
+    
+    return {
+      id: quickAdd.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      label: quickAdd.label,
+      amount: parseFloat(quickAdd.amount) || 0,
+      category: quickAdd.category,
+      description: quickAdd.description,
+      order: parseInt(quickAdd.order) || 0,
+      createdAt: quickAdd.createdAt || new Date().toISOString(),
+    } as QuickAddOption
+  })
 }
 
 export function generateReportHTML(data: ReportData): string {
@@ -196,7 +384,7 @@ export function generateReportHTML(data: ReportData): string {
         </div>
         <div class="summary-card">
             <h3>Daily Average</h3>
-            <div class="value">$${analytics.dailyAverage.toLocaleString()}</div>
+            <div class="value">$${analytics.averageDaily.toLocaleString()}</div>
         </div>
     </div>
 
@@ -274,7 +462,7 @@ export function generateReportHTML(data: ReportData): string {
                         (budget) => `
                         <tr>
                             <td>${budget.category}</td>
-                            <td class="amount">$${budget.amount.toLocaleString()}</td>
+                            <td class="amount">$${budget.limit.toLocaleString()}</td>
                             <td>${budget.period}</td>
                         </tr>
                     `,
