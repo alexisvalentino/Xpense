@@ -1,30 +1,43 @@
-# Expense tracker graph
+# Xpense
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A modern expense tracker focused on simplicity, speed, and beautiful visuals.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/alexisvalentinos-projects/v0-expense-tracker-graph)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/wnCrlYGOfmJ)
+## Features
 
-## Overview
+- Expense Management: add, edit, delete; quick add; undo delete
+- Budgets: weekly/monthly/yearly, progress bars, alerts (warning/danger/exceeded)
+- Analytics: category breakdown, trends, comparisons, smart insights
+- Recurring Expenses: subscriptions/bills with due statuses and one-tap execution
+- Export/Import: JSON full backup and importable CSV (expenses, budgets, recurring, quick add)
+- Reports: downloadable/printable HTML report with charts and summaries
+- Search: desktop and mobile search that filters in real time
+- Notifications: budget and recurring alerts (overdue/due soon)
+- UI/UX: glassmorphism, responsive, accessible, dark theme
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Tech Stack
 
-## Deployment
+- Framework: Next.js 15 (App Router)
+- Library: React 19 + TypeScript
+- Styling: Tailwind CSS
+- UI: Radix UI primitives + custom components
+- Charts: Recharts
+- Storage: IndexedDB (client-side persistence)
+- Icons: Lucide React
 
-Your project is live at:
+## Getting Started
 
-**[https://vercel.com/alexisvalentinos-projects/v0-expense-tracker-graph](https://vercel.com/alexisvalentinos-projects/v0-expense-tracker-graph)**
+Prerequisites: Node.js 18+ and pnpm (or npm).
 
-## Build your app
+Install and run locally:
 
-Continue building your app on:
+```bash
+pnpm install
+pnpm dev
+```
 
-**[https://v0.app/chat/projects/wnCrlYGOfmJ](https://v0.app/chat/projects/wnCrlYGOfmJ)**
+Build and start production:
 
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+```bash
+pnpm build
+pnpm start
+```
