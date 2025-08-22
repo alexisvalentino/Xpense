@@ -31,6 +31,7 @@ export default function ExpenseTracker() {
   const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null)
   const [activeTab, setActiveTab] = useState<"overview" | "budgets" | "analytics" | "recurring" | "export">("overview")
   const [searchQuery, setSearchQuery] = useState("")
+  const [recentCount, setRecentCount] = useState(10)
 
   type AppNotification = {
     id: string
@@ -228,6 +229,73 @@ export default function ExpenseTracker() {
     setEditingExpense(null)
   }
 
+  // Budget CRUD - lifted to app level
+  const addBudget = async (data: Omit<Budget, "id" | "createdAt">) => {
+    const newBudget: Budget = {
+      ...data,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+    }
+    try {
+      await expenseDB.addBudget(newBudget)
+      setBudgets((prev) => [...prev, newBudget])
+    } catch (error) {
+      console.error("Failed to add budget:", error)
+    }
+  }
+
+  const updateBudget = async (budget: Budget) => {
+    try {
+      await expenseDB.updateBudget(budget)
+      setBudgets((prev) => prev.map((b) => (b.id === budget.id ? budget : b)))
+    } catch (error) {
+      console.error("Failed to update budget:", error)
+    }
+  }
+
+  const deleteBudgetById = async (id: string) => {
+    try {
+      await expenseDB.deleteBudget(id)
+      setBudgets((prev) => prev.filter((b) => b.id !== id))
+    } catch (error) {
+      console.error("Failed to delete budget:", error)
+    }
+  }
+
+  // Recurring CRUD - lifted to app level
+  const addRecurring = async (
+    data: Omit<RecurringExpense, "id" | "createdAt">,
+  ) => {
+    const newRecurring: RecurringExpense = {
+      ...data,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+    }
+    try {
+      await expenseDB.addRecurringExpense(newRecurring)
+      setRecurringExpenses((prev) => [...prev, newRecurring])
+    } catch (error) {
+      console.error("Failed to add recurring expense:", error)
+    }
+  }
+
+  const updateRecurring = async (recurring: RecurringExpense) => {
+    try {
+      await expenseDB.updateRecurringExpense(recurring)
+      setRecurringExpenses((prev) => prev.map((r) => (r.id === recurring.id ? recurring : r)))
+    } catch (error) {
+      console.error("Failed to update recurring expense:", error)
+    }
+  }
+
+  const deleteRecurringById = async (id: string) => {
+    try {
+      await expenseDB.deleteRecurringExpense(id)
+      setRecurringExpenses((prev) => prev.filter((r) => r.id !== id))
+    } catch (error) {
+      console.error("Failed to delete recurring expense:", error)
+    }
+  }
 
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
@@ -235,6 +303,8 @@ export default function ExpenseTracker() {
   if (isLoading) {
     return <MainPageSkeleton />
   }
+
+  const incrementRecent = () => setRecentCount((c) => c + 10)
 
   return (
     <div className="min-h-screen bg-background">
@@ -250,11 +320,25 @@ export default function ExpenseTracker() {
           <ResponsiveHeader />
 
           {activeTab === "budgets" ? (
-            <BudgetManagement expenses={expenses} isLoading={isLoading} />
+            <BudgetManagement 
+              expenses={expenses} 
+              isLoading={isLoading} 
+              budgets={budgets}
+              onAddBudget={addBudget}
+              onUpdateBudget={updateBudget}
+              onDeleteBudget={deleteBudgetById}
+            />
           ) : activeTab === "analytics" ? (
             <AnalyticsDashboard expenses={expenses} isLoading={isLoading} />
           ) : activeTab === "recurring" ? (
-            <RecurringExpenses onAddExpense={addExpense} isLoading={isLoading} />
+            <RecurringExpenses 
+              onAddExpense={addExpense} 
+              isLoading={isLoading} 
+              recurringExpenses={recurringExpenses}
+              onAddRecurring={addRecurring}
+              onUpdateRecurring={updateRecurring}
+              onDeleteRecurring={deleteRecurringById}
+            />
           ) : activeTab === "export" ? (
             <DataExport expenses={expenses} budgets={budgets} recurring={recurringExpenses} />
           ) : (
@@ -344,11 +428,22 @@ export default function ExpenseTracker() {
                   </CardHeader>
                   <CardContent className="p-2 md:p-6">
                     <ExpenseList
-                      expenses={filteredExpenses.slice(0, 10)}
+                      expenses={filteredExpenses.slice(0, recentCount)}
                       onDelete={deleteExpense}
                       onEdit={handleEdit}
                       isLoading={isLoading}
                     />
+                    {filteredExpenses.length > recentCount && (
+                      <div className="mt-4 flex justify-center">
+                        <Button 
+                          onClick={incrementRecent}
+                          variant="outline"
+                          className="glass-strong bg-card/20 border-border/30 rounded-xl"
+                        >
+                          Show more
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

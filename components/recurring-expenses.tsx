@@ -18,6 +18,10 @@ import { getCategoryColor } from "@/lib/category-colors"
 interface RecurringExpensesProps {
   onAddExpense: (expense: Omit<Expense, "id">) => void
   isLoading?: boolean
+  recurringExpenses?: RecurringExpense[]
+  onAddRecurring?: (recurring: Omit<RecurringExpense, "id" | "createdAt">) => Promise<void> | void
+  onUpdateRecurring?: (recurring: RecurringExpense) => Promise<void> | void
+  onDeleteRecurring?: (id: string) => Promise<void> | void
 }
 
 const categories = [
@@ -32,7 +36,7 @@ const categories = [
   "Other",
 ]
 
-export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: RecurringExpensesProps) {
+export function RecurringExpenses({ onAddExpense, isLoading: externalLoading, recurringExpenses: controlledRecurring, onAddRecurring, onUpdateRecurring, onDeleteRecurring }: RecurringExpensesProps) {
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingRecurring, setEditingRecurring] = useState<RecurringExpense | null>(null)
@@ -45,8 +49,13 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
   const [frequency, setFrequency] = useState<RecurringExpense["frequency"]>("monthly")
 
   useEffect(() => {
+    if (controlledRecurring) {
+      setRecurringExpenses(controlledRecurring)
+      setIsLoading(false)
+      return
+    }
     loadRecurringExpenses()
-  }, [])
+  }, [controlledRecurring])
 
   const loadRecurringExpenses = async () => {
     try {
@@ -97,13 +106,21 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
 
     try {
       if (editingRecurring) {
-        const updated = { ...recurringData, id: editingRecurring.id }
-        await expenseDB.updateRecurringExpense(updated)
-        setRecurringExpenses((prev) => prev.map((r) => (r.id === editingRecurring.id ? updated : r)))
+        const updated: RecurringExpense = { ...recurringData, id: editingRecurring.id }
+        if (onUpdateRecurring) {
+          await onUpdateRecurring(updated)
+        } else {
+          await expenseDB.updateRecurringExpense(updated)
+          setRecurringExpenses((prev) => prev.map((r) => (r.id === editingRecurring.id ? updated : r)))
+        }
       } else {
-        const newRecurring = { ...recurringData, id: Date.now().toString() }
-        await expenseDB.addRecurringExpense(newRecurring)
-        setRecurringExpenses((prev) => [...prev, newRecurring])
+        const newRecurring: RecurringExpense = { ...recurringData, id: Date.now().toString() }
+        if (onAddRecurring) {
+          await onAddRecurring({ amount: newRecurring.amount, category: newRecurring.category, description: newRecurring.description, frequency: newRecurring.frequency, nextDue: newRecurring.nextDue, isActive: true })
+        } else {
+          await expenseDB.addRecurringExpense(newRecurring)
+          setRecurringExpenses((prev) => [...prev, newRecurring])
+        }
       }
 
       resetForm()
@@ -123,8 +140,12 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
 
   const handleDelete = async (id: string) => {
     try {
-      await expenseDB.deleteRecurringExpense(id)
-      setRecurringExpenses((prev) => prev.filter((r) => r.id !== id))
+      if (onDeleteRecurring) {
+        await onDeleteRecurring(id)
+      } else {
+        await expenseDB.deleteRecurringExpense(id)
+        setRecurringExpenses((prev) => prev.filter((r) => r.id !== id))
+      }
     } catch (error) {
       console.error("Failed to delete recurring expense:", error)
     }
@@ -133,8 +154,12 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
   const handleToggleActive = async (recurring: RecurringExpense) => {
     const updated = { ...recurring, isActive: !recurring.isActive }
     try {
-      await expenseDB.updateRecurringExpense(updated)
-      setRecurringExpenses((prev) => prev.map((r) => (r.id === recurring.id ? updated : r)))
+      if (onUpdateRecurring) {
+        await onUpdateRecurring(updated)
+      } else {
+        await expenseDB.updateRecurringExpense(updated)
+        setRecurringExpenses((prev) => prev.map((r) => (r.id === recurring.id ? updated : r)))
+      }
     } catch (error) {
       console.error("Failed to toggle recurring expense:", error)
     }
@@ -156,8 +181,12 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
     }
 
     try {
-      await expenseDB.updateRecurringExpense(updated)
-      setRecurringExpenses((prev) => prev.map((r) => (r.id === recurring.id ? updated : r)))
+      if (onUpdateRecurring) {
+        await onUpdateRecurring(updated)
+      } else {
+        await expenseDB.updateRecurringExpense(updated)
+        setRecurringExpenses((prev) => prev.map((r) => (r.id === recurring.id ? updated : r)))
+      }
     } catch (error) {
       console.error("Failed to update recurring expense:", error)
     }

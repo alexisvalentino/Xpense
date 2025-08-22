@@ -20,6 +20,10 @@ import { calculateBudgetProgress, getBudgetStatusColor, formatPeriod, type Budge
 interface BudgetManagementProps {
   expenses: Expense[]
   isLoading?: boolean
+  budgets?: Budget[]
+  onAddBudget?: (budget: Omit<Budget, "id" | "createdAt">) => Promise<void> | void
+  onUpdateBudget?: (budget: Budget) => Promise<void> | void
+  onDeleteBudget?: (id: string) => Promise<void> | void
 }
 
 const categories = [
@@ -34,7 +38,7 @@ const categories = [
   "Other",
 ]
 
-export function BudgetManagement({ expenses, isLoading: externalLoading }: BudgetManagementProps) {
+export function BudgetManagement({ expenses, isLoading: externalLoading, budgets: controlledBudgets, onAddBudget, onUpdateBudget, onDeleteBudget }: BudgetManagementProps) {
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [budgetProgress, setBudgetProgress] = useState<BudgetProgress[]>([])
   const [showForm, setShowForm] = useState(false)
@@ -47,8 +51,13 @@ export function BudgetManagement({ expenses, isLoading: externalLoading }: Budge
   const [period, setPeriod] = useState<Budget["period"]>("monthly")
 
   useEffect(() => {
+    if (controlledBudgets) {
+      setBudgets(controlledBudgets)
+      setIsLoading(false)
+      return
+    }
     loadBudgets()
-  }, [])
+  }, [controlledBudgets])
 
   useEffect(() => {
     if (budgets.length > 0) {
@@ -82,13 +91,21 @@ export function BudgetManagement({ expenses, isLoading: externalLoading }: Budge
 
     try {
       if (editingBudget) {
-        const updatedBudget = { ...budgetData, id: editingBudget.id }
-        await expenseDB.updateBudget(updatedBudget)
-        setBudgets((prev) => prev.map((b) => (b.id === editingBudget.id ? updatedBudget : b)))
+        const updatedBudget: Budget = { ...budgetData, id: editingBudget.id }
+        if (onUpdateBudget) {
+          await onUpdateBudget(updatedBudget)
+        } else {
+          await expenseDB.updateBudget(updatedBudget)
+          setBudgets((prev) => prev.map((b) => (b.id === editingBudget.id ? updatedBudget : b)))
+        }
       } else {
-        const newBudget = { ...budgetData, id: Date.now().toString() }
-        await expenseDB.addBudget(newBudget)
-        setBudgets((prev) => [...prev, newBudget])
+        const newBudget: Budget = { ...budgetData, id: Date.now().toString() }
+        if (onAddBudget) {
+          await onAddBudget({ category: newBudget.category, limit: newBudget.limit, period: newBudget.period })
+        } else {
+          await expenseDB.addBudget(newBudget)
+          setBudgets((prev) => [...prev, newBudget])
+        }
       }
 
       resetForm()
@@ -107,8 +124,12 @@ export function BudgetManagement({ expenses, isLoading: externalLoading }: Budge
 
   const handleDelete = async (id: string) => {
     try {
-      await expenseDB.deleteBudget(id)
-      setBudgets((prev) => prev.filter((b) => b.id !== id))
+      if (onDeleteBudget) {
+        await onDeleteBudget(id)
+      } else {
+        await expenseDB.deleteBudget(id)
+        setBudgets((prev) => prev.filter((b) => b.id !== id))
+      }
     } catch (error) {
       console.error("Failed to delete budget:", error)
     }
@@ -142,10 +163,21 @@ export function BudgetManagement({ expenses, isLoading: externalLoading }: Budge
   return (
     <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
       <CardHeader className="pb-4 md:pb-6">
-        <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-          <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-          <span>Budget Management</span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
+            <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+            <span>Budget Management</span>
+          </CardTitle>
+          {!showForm && (
+            <Button 
+              onClick={() => setShowForm(true)}
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-xl h-10 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 border border-secondary/30 hover:border-secondary/50"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Budget
+            </Button>
+          )}
+        </div>
         <p className="text-sm md:text-base text-muted-foreground">
           Set spending limits and track your budget progress across different categories
         </p>
