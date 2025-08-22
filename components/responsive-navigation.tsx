@@ -12,7 +12,6 @@ import {
   Repeat, 
   Download, 
   X, 
-  Wallet,
   Settings,
   User,
   Search,
@@ -70,8 +69,8 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
       <div className="p-6">
         {/* Logo and Brand */}
         <div className="flex items-center space-x-3 mb-8">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
-            <Wallet className="h-7 w-7 text-primary" />
+          <div className="p-2 rounded-lg bg-black/20 backdrop-blur-sm">
+            <img src="/x-logo.svg" alt="Xpense Logo" className="h-7 w-7" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground">Xpense</h1>
@@ -124,65 +123,60 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
   // Desktop Top Header
   const DesktopHeader = () => (
     <div className="hidden md:block fixed top-0 left-64 right-0 z-30 glass-strong border-b border-border/30 backdrop-blur-xl">
-      <div className="flex items-center justify-between px-6 py-4">
-        {/* Left: Search Bar */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search expenses..."
-              className="w-full pl-10 pr-4 py-2 bg-card/50 border border-border/30 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
-              value={searchQuery}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Right: Notifications and Profile */}
-        <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-10 w-10 p-0 glass-strong hover:bg-secondary/20 relative"
-            onClick={() => setIsNotifOpen(true)}
-          >
-            <Bell className="h-4 w-4" />
-            {notifications.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1rem] h-5 flex items-center justify-center">
-                {notifications.length}
-              </span>
-            )}
-          </Button>
-          <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
-            <SheetContent side="right" className="glass-modal w-[360px] p-0">
-              <div className="p-4 border-b border-border/30">
-                <h3 className="font-semibold">Notifications</h3>
+      <div className="flex items-center justify-center px-4 md:px-6 lg:px-8 py-3 md:py-4">
+        {/* Centered Search Bar with Notification - Inline with overview content */}
+        <div className="w-full max-w-4xl px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-center space-x-4">
+            {/* Search Bar - Fills available width */}
+            <div className="flex-1 max-w-none">
+              <div className="relative w-full">
+                <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search expenses..."
+                  className="w-full pl-7 md:pl-10 pr-3 md:pr-4 py-1.5 md:py-2 bg-card/50 border border-border/30 rounded-lg text-xs md:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                />
               </div>
-              <div className="p-4 space-y-3 overflow-y-auto max-h-[80vh]">
-                {notifications.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No notifications</div>
-                ) : (
-                  notifications.map((n) => (
-                    <div key={n.id} className={`p-3 rounded-lg glass ${n.severity === 'danger' ? 'border border-red-500/30' : n.severity === 'warning' ? 'border border-amber-500/30' : 'border border-border/30'}`}>
-                      <div className="text-sm font-medium">{n.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{n.message}</div>
-                    </div>
-                  ))
+            </div>
+            
+            {/* Notification - Right beside search bar */}
+            <div className="flex-shrink-0">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-10 w-10 p-0 glass-strong hover:bg-secondary/20 relative"
+                onClick={() => setIsNotifOpen(true)}
+              >
+                <Bell className="h-4 w-4" />
+                {notifications.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1rem] h-5 flex items-center justify-center">
+                    {notifications.length}
+                  </span>
                 )}
-              </div>
-            </SheetContent>
-          </Sheet>
-          
-          {/* Profile Settings */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-10 w-10 p-0 glass-strong hover:bg-secondary/20"
-          >
-            <User className="h-4 w-4" />
-          </Button>
+              </Button>
+              <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
+                <SheetContent side="right" className="glass-modal w-[360px] p-0">
+                  <div className="p-4 border-b border-border/30">
+                    <h3 className="font-semibold">Notifications</h3>
+                  </div>
+                  <div className="p-4 space-y-3 overflow-y-auto max-h-[80vh]">
+                    {notifications.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No notifications</div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div key={n.id} className={`p-3 rounded-lg glass ${n.severity === 'danger' ? 'border border-red-500/30' : n.severity === 'warning' ? 'border border-amber-500/30' : 'border border-border/30'}`}>
+                          <div className="text-sm font-medium">{n.title}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{n.message}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -194,8 +188,8 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo and Title */}
         <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
-            <Wallet className="h-5 w-5 text-primary" />
+          <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-sm">
+            <img src="/x-logo.svg" alt="Xpense Logo" className="h-5 w-5" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">Xpense</h1>
@@ -204,27 +198,27 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
         </div>
 
         {/* Search, Notifications, Profile and Mobile Menu */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 sm:space-x-2">
           {/* Search Button */}
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-9 w-9 p-0 glass-strong hover:bg-secondary/20"
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20"
             onClick={() => setIsMobileSearchOpen(true)}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
           
           {/* Notifications */}
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-9 w-9 p-0 glass-strong hover:bg-secondary/20 relative"
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20 relative"
             onClick={() => setIsNotifOpen(true)}
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
             {notifications.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1rem] h-5 flex items-center justify-center">
+              <span className="absolute -top-1.5 sm:-top-2 -right-1.5 sm:-right-2 bg-red-500 text-white text-xs rounded-full px-1 sm:px-1.5 py-0.5 min-w-[1rem] h-4 sm:h-5 flex items-center justify-center">
                 {notifications.length}
               </span>
             )}
@@ -249,14 +243,7 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
             </SheetContent>
           </Sheet>
           
-          {/* Profile Settings */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-9 w-9 p-0 glass-strong hover:bg-secondary/20"
-          >
-            <User className="h-4 w-4" />
-          </Button>
+
           
           {/* Mobile Menu Button */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -264,9 +251,9 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-9 w-9 p-0 glass-strong hover:bg-secondary/20"
+                className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20"
               >
-                <Menu className="h-4 w-4" />
+                <Menu className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="glass-modal w-[300px] sm:w-[350px] p-0">
@@ -274,8 +261,8 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border/30">
                   <div className="flex items-center space-x-3">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30">
-                      <Wallet className="h-6 w-6 text-primary" />
+                    <div className="p-2 rounded-lg bg-black/20 backdrop-blur-sm">
+                      <img src="/x-logo.svg" alt="Xpense Logo" className="h-6 w-6" />
                     </div>
                     <div>
                       <h2 className="text-lg font-bold">Xpense</h2>
@@ -335,24 +322,24 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
       </div>
       {/* Mobile search overlay */}
       {isMobileSearchOpen && (
-        <div className="absolute inset-x-0 top-full z-50 p-3 bg-background/80 backdrop-blur-xl border-b border-border/30">
+        <div className="absolute inset-x-0 top-full z-50 p-2 sm:p-3 bg-background/80 backdrop-blur-xl border-b border-border/30">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             <input
               autoFocus
               type="text"
               placeholder="Search expenses..."
-              className="w-full pl-10 pr-10 py-2 bg-card/50 border border-border/30 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
+              className="w-full pl-7 sm:pl-10 pr-8 sm:pr-10 py-1.5 sm:py-2 bg-card/50 border border-border/30 rounded-lg text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all"
               value={searchQuery}
               onChange={(e) => onSearchChange?.(e.target.value)}
             />
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 sm:h-7 sm:w-7 p-0"
               onClick={() => setIsMobileSearchOpen(false)}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>

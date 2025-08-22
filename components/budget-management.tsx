@@ -143,9 +143,7 @@ export function BudgetManagement({ expenses, isLoading: externalLoading }: Budge
     <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
       <CardHeader className="pb-4 md:pb-6">
         <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-          <div className="p-2 md:p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/30">
-            <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-          </div>
+          <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
           <span>Budget Management</span>
         </CardTitle>
         <p className="text-sm md:text-base text-muted-foreground">
@@ -315,9 +313,7 @@ export function BudgetManagement({ expenses, isLoading: externalLoading }: Budge
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="p-4 rounded-full bg-secondary/20 w-fit mx-auto mb-6 border border-secondary/30">
-              <Target className="h-10 w-10 text-secondary" />
-            </div>
+            <Target className="h-10 w-10 text-secondary mx-auto mb-6" />
             <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3">No budgets set</h3>
             <p className="text-muted-foreground mb-6 text-base md:text-lg">
               Create your first budget to start tracking your spending limits

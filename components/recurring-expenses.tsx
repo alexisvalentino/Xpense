@@ -199,9 +199,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
       <CardHeader className="pb-4 md:pb-6">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-            <div className="p-2 md:p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/30">
-              <Repeat className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-            </div>
+            <Repeat className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
             <span>Recurring Expenses</span>
           </CardTitle>
         </div>

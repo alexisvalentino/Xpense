@@ -38,9 +38,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
       <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
         <CardContent className="p-12 text-center">
           <div className="space-y-6">
-            <div className="p-4 rounded-full bg-secondary/20 w-fit mx-auto border border-secondary/30">
-              <TrendingUp className="h-12 w-12 text-secondary" />
-            </div>
+            <TrendingUp className="h-12 w-12 text-secondary mx-auto" />
             <div>
               <h3 className="text-xl font-bold text-foreground mb-2">No data for analytics</h3>
               <p className="text-muted-foreground text-base">Add some expenses to see your spending insights</p>
@@ -58,9 +56,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
         <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
               <DollarSign className="h-4 w-4 text-secondary" />
-              </div>
               <span className="text-sm text-muted-foreground">Daily Average</span>
             </div>
             <p className="text-2xl md:text-3xl font-bold text-foreground mt-2">${analytics.averageDaily.toFixed(0)}</p>
@@ -70,9 +66,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
         <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
               <Target className="h-4 w-4 text-secondary" />
-              </div>
               <span className="text-sm text-muted-foreground">Avg Transaction</span>
             </div>
             <p className="text-2xl md:text-3xl font-bold text-foreground mt-2">${analytics.averageTransaction.toFixed(0)}</p>
@@ -82,9 +76,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
         <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
               <Calendar className="h-4 w-4 text-secondary" />
-              </div>
               <span className="text-sm text-muted-foreground">Top Category</span>
             </div>
             <p className="text-lg md:text-xl font-bold text-foreground mt-2">{analytics.topCategory || "N/A"}</p>
@@ -123,9 +115,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
       <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-3 text-lg md:text-xl font-bold">
-            <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
             <Calendar className="h-5 w-5 text-secondary" />
-            </div>
             <span>Monthly Comparison</span>
           </CardTitle>
         </CardHeader>
@@ -178,9 +168,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
       <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-3 text-lg md:text-xl font-bold">
-            <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
             <TrendingUp className="h-5 w-5 text-secondary" />
-            </div>
             <span>Category Insights</span>
           </CardTitle>
         </CardHeader>
@@ -279,9 +267,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
       <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-3 text-lg md:text-xl font-bold">
-            <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-              <Lightbulb className="h-5 w-5 text-secondary" />
-            </div>
+            <Lightbulb className="h-5 w-5 text-secondary" />
             <span>Spending Summary</span>
             </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -293,9 +279,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
             {/* Top Spending Category */}
             <div className="p-4 glass-strong bg-card/20 rounded-lg border border-border/30">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-                  <TrendingUp className="h-4 w-4 text-secondary" />
-                </div>
+                <TrendingUp className="h-4 w-4 text-secondary" />
                 <h4 className="font-semibold text-foreground text-sm">Top Category</h4>
               </div>
               <p className="text-lg font-bold text-foreground mb-1">{analytics.topCategory || "N/A"}</p>
@@ -307,9 +291,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
             {/* Average Daily Spending */}
             <div className="p-4 glass-strong bg-card/20 rounded-lg border border-border/30">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-                  <Calendar className="h-4 w-4 text-secondary" />
-                </div>
+                <Calendar className="h-4 w-4 text-secondary" />
                 <h4 className="font-semibold text-foreground text-sm">Daily Average</h4>
               </div>
               <p className="text-lg font-bold text-foreground mb-1">${analytics.averageDaily.toFixed(0)}</p>

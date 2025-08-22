@@ -294,9 +294,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
       <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
         <CardHeader className="pb-4 md:pb-6">
           <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-            <div className="p-2 md:p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/30">
-              <Download className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-            </div>
+            <Download className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
             <span>Data Export & Import</span>
         </CardTitle>
           <p className="text-sm md:text-base text-muted-foreground">
@@ -308,9 +306,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center space-x-3 text-lg font-semibold">
-                <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-                  <Calendar className="h-5 w-5 text-secondary" />
-                </div>
+                <Calendar className="h-5 w-5 text-secondary" />
                 <span>Export Date Range</span>
               </CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -318,36 +314,31 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Quick Presets - Prominent and Easy to Use */}
+              {/* Quick Presets - Clean Dropdown */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-foreground">Quick Presets</Label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                  {Object.entries(datePresets).map(([key, preset]) => (
-                    <Button
-                      key={key}
-                      variant="outline"
-                      onClick={() => handlePresetSelect(key)}
-                      className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 hover:bg-secondary/10 h-auto py-3 px-3 text-center transition-all duration-200 group"
-                    >
-                      <div className="space-y-1">
-                        <div className="text-xs font-semibold text-foreground group-hover:text-secondary transition-colors duration-200">
-                          {key.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                <Select onValueChange={handlePresetSelect}>
+                  <SelectTrigger className="glass-strong bg-card/20 border-border/30 h-12">
+                    <SelectValue placeholder="Select a preset date range" />
+                  </SelectTrigger>
+                  <SelectContent className="glass-dropdown">
+                    {Object.entries(datePresets).map(([key, preset]) => (
+                      <SelectItem key={key} value={key} className="glass-dropdown-item">
+                        <div className="flex items-center justify-between w-full">
+                          <span>{key.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {preset.from} - {preset.to}
+                          </span>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {preset.from} - {preset.to}
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Custom Date Range - Clean and Simple */}
               <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-1 h-4 bg-secondary rounded-full"></div>
-                  <Label className="text-sm font-medium text-foreground">Custom Date Range</Label>
-                </div>
+                <Label className="text-sm font-medium text-foreground">Custom Date Range</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date-from" className="text-xs text-muted-foreground">From Date</Label>
@@ -374,14 +365,12 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
               {/* Current Selection Summary */}
               {(dateFrom || dateTo) && (
-                <div className="p-3 glass-strong bg-secondary/10 rounded-lg border border-secondary/30">
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Calendar className="h-4 w-4 text-secondary" />
-                    <span className="text-muted-foreground">Selected Period:</span>
-                    <span className="font-medium text-foreground">
-                      {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} - {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
-                    </span>
-                  </div>
+                <div className="flex items-center space-x-2 text-sm p-2 glass-strong bg-secondary/10 rounded-lg border border-secondary/30">
+                  <Calendar className="h-4 w-4 text-secondary" />
+                  <span className="text-muted-foreground">Period:</span>
+                  <span className="font-medium text-foreground">
+                    {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} - {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
+                  </span>
                 </div>
               )}
             </CardContent>
@@ -396,9 +385,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("expenses")}>
                 <CardContent className="p-4 text-center space-y-3">
-                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
-                    <FileText className="h-6 w-6 text-secondary" />
-                  </div>
+                  <FileText className="h-6 w-6 text-secondary mx-auto" />
           <div>
                     <h4 className="font-semibold text-foreground text-sm">Expenses CSV</h4>
                     <p className="text-xs text-muted-foreground">Download all expenses</p>
@@ -408,9 +395,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
               <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("budgets")}>
                 <CardContent className="p-4 text-center space-y-3">
-                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
-                    <Target className="h-6 w-6 text-secondary" />
-          </div>
+                  <Target className="h-6 w-6 text-secondary mx-auto" />
                   <div>
                     <h4 className="font-semibold text-foreground text-sm">Budgets CSV</h4>
                     <p className="text-xs text-muted-foreground">Export budget settings</p>
@@ -420,9 +405,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
               <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("recurring")}>
                 <CardContent className="p-4 text-center space-y-3">
-                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
-                    <Repeat className="h-6 w-6 text-secondary" />
-                  </div>
+                  <Repeat className="h-6 w-6 text-secondary mx-auto" />
                   <div>
                     <h4 className="font-semibold text-foreground text-sm">Recurring CSV</h4>
                     <p className="text-xs text-muted-foreground">Export templates</p>
@@ -432,9 +415,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
               <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("all")}>
                 <CardContent className="p-4 text-center space-y-3">
-                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
-                    <Database className="h-6 w-6 text-secondary" />
-                  </div>
+                  <Database className="h-6 w-6 text-secondary mx-auto" />
           <div>
                     <h4 className="font-semibold text-foreground text-sm">All Data JSON</h4>
                     <p className="text-xs text-muted-foreground">Complete backup</p>
@@ -448,9 +429,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleGenerateReport("download")}>
               <CardContent className="p-6 text-center space-y-4">
-                <div className="p-4 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
-                  <FileText className="h-8 w-8 text-secondary" />
-                </div>
+                <FileText className="h-8 w-8 text-secondary mx-auto" />
                 <div>
                   <h4 className="font-semibold text-foreground text-lg">Download HTML Report</h4>
                   <p className="text-sm text-muted-foreground">Generate and download detailed report</p>
@@ -460,9 +439,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
             <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleGenerateReport("print")}>
               <CardContent className="p-6 text-center space-y-4">
-                <div className="p-4 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
-                  <Printer className="h-8 w-8 text-secondary" />
-                </div>
+                <Printer className="h-8 w-8 text-secondary mx-auto" />
                 <div>
                   <h4 className="font-semibold text-foreground text-lg">Print Report</h4>
                   <p className="text-sm text-muted-foreground">Print directly or save as PDF</p>
@@ -481,9 +458,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="p-3 rounded-lg bg-secondary/20 border border-secondary/30">
-                  <Upload className="h-6 w-6 text-secondary" />
-        </div>
+                <Upload className="h-6 w-6 text-secondary" />
                      <div>
                   <h4 className="font-semibold text-foreground">Import from JSON file</h4>
                   <p className="text-sm text-muted-foreground">Restore your data from a backup</p>
@@ -542,9 +517,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             <Card className="glass-strong bg-secondary/10 border-secondary/30 shadow-lg backdrop-blur-lg">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center space-x-2 text-base font-semibold">
-                  <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-                    <FileText className="h-4 w-4 text-secondary" />
-                  </div>
+                  <FileText className="h-4 w-4 text-secondary" />
                   <span>Export Summary</span>
                 </CardTitle>
               </CardHeader>

@@ -358,9 +358,7 @@ export default function ExpenseTracker() {
                 <Card className="glass">
                   <CardContent className="p-8 md:p-12 text-center">
                     <div className="space-y-4">
-                      <div className="p-3 md:p-4 rounded-full bg-muted/20 w-fit mx-auto">
-                        <DollarSign className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />
-                      </div>
+                      <DollarSign className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground mx-auto" />
                       <div>
                         <h3 className="text-base md:text-lg font-semibold text-foreground">No expenses yet</h3>
                         <p className="text-sm md:text-base text-muted-foreground">
