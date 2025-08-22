@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Download, FileText, FileSpreadsheet, Printer, Upload, Trash2 } from "lucide-react"
+import { Download, FileText, FileSpreadsheet, Printer, Upload, Trash2, Repeat, Target, Database, Calendar } from "lucide-react"
 import type { Expense, Budget, RecurringExpense } from "@/lib/db"
 import { expenseDB } from "@/lib/db"
 import { calculateAnalytics } from "@/lib/analytics-utils"
@@ -30,6 +30,7 @@ import {
   getDateRangePresets,
   type ReportData,
 } from "@/lib/export-utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface DataExportProps {
   expenses: Expense[]
@@ -256,7 +257,8 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
       window.location.reload()
     } catch (error) {
       console.error("Import failed:", error)
-      alert(`Failed to import data: ${error.message}. Please check the file format and try again.`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to import data: ${errorMessage}. Please check the file format and try again.`)
     } finally {
       setIsExporting(false)
       // Reset file input
@@ -287,207 +289,289 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
   }
 
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Download className="h-5 w-5 text-secondary" />
-          <span>Data Export & Reports</span>
+    <div className="space-y-6">
+      {/* Main Export Card */}
+      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
+        <CardHeader className="pb-4 md:pb-6">
+          <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
+            <div className="p-2 md:p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/30">
+              <Download className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+            </div>
+            <span>Data Export & Import</span>
         </CardTitle>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Export your data in various formats or import data from other sources
+          </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Date Range Selection */}
+          {/* Date Range Selection - Much Better Design */}
+          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-3 text-lg font-semibold">
+                <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
+                  <Calendar className="h-5 w-5 text-secondary" />
+                </div>
+                <span>Export Date Range</span>
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Choose a specific date range or use a quick preset for your export
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Quick Presets - Prominent and Easy to Use */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-foreground">Quick Presets</Label>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  {Object.entries(datePresets).map(([key, preset]) => (
+                    <Button
+                      key={key}
+                      variant="outline"
+                      onClick={() => handlePresetSelect(key)}
+                      className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 hover:bg-secondary/10 h-auto py-3 px-3 text-center transition-all duration-200 group"
+                    >
+                      <div className="space-y-1">
+                        <div className="text-xs font-semibold text-foreground group-hover:text-secondary transition-colors duration-200">
+                          {key.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {preset.from} - {preset.to}
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Date Range - Clean and Simple */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-1 h-4 bg-secondary rounded-full"></div>
+                  <Label className="text-sm font-medium text-foreground">Custom Date Range</Label>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="date-from" className="text-xs text-muted-foreground">From Date</Label>
+                    <Input
+                      id="date-from"
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="glass-strong bg-card/20 border-border/30 h-12 text-foreground placeholder:text-muted-foreground focus:border-secondary/50 focus:ring-secondary/20 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="date-to" className="text-xs text-muted-foreground">To Date</Label>
+                    <Input
+                      id="date-to"
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="glass-strong bg-card/20 border-border/30 h-12 text-foreground placeholder:text-muted-foreground focus:border-secondary/50 focus:ring-secondary/20 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Selection Summary */}
+              {(dateFrom || dateTo) && (
+                <div className="p-3 glass-strong bg-secondary/10 rounded-lg border border-secondary/30">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Calendar className="h-4 w-4 text-secondary" />
+                    <span className="text-muted-foreground">Selected Period:</span>
+                    <span className="font-medium text-foreground">
+                      {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} - {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Export Options - Bento Grid */}
         <div className="space-y-4">
-          <div>
-            <Label className="text-base font-medium">Report Period</Label>
-            <p className="text-sm text-muted-foreground">Select a date range for your reports and exports</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {Object.entries(datePresets).map(([key, preset]) => (
-              <Button
-                key={key}
-                onClick={() => handlePresetSelect(key)}
-                variant="outline"
-                size="sm"
-                className="glass bg-transparent rounded-full py-2 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-              >
-                {preset.label}
-              </Button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dateFrom">From Date</Label>
-              <Input
-                id="dateFrom"
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="glass"
-              />
+            <div className="flex items-center space-x-2">
+              <div className="w-1 h-6 bg-secondary rounded-full"></div>
+              <h3 className="text-lg font-semibold text-foreground">Export Options</h3>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="dateTo">To Date</Label>
-              <Input
-                id="dateTo"
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="glass"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("expenses")}>
+                <CardContent className="p-4 text-center space-y-3">
+                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
+                    <FileText className="h-6 w-6 text-secondary" />
+                  </div>
+          <div>
+                    <h4 className="font-semibold text-foreground text-sm">Expenses CSV</h4>
+                    <p className="text-xs text-muted-foreground">Download all expenses</p>
+          </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("budgets")}>
+                <CardContent className="p-4 text-center space-y-3">
+                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
+                    <Target className="h-6 w-6 text-secondary" />
+          </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground text-sm">Budgets CSV</h4>
+                    <p className="text-xs text-muted-foreground">Export budget settings</p>
+        </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("recurring")}>
+                <CardContent className="p-4 text-center space-y-3">
+                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
+                    <Repeat className="h-6 w-6 text-secondary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground text-sm">Recurring CSV</h4>
+                    <p className="text-xs text-muted-foreground">Export templates</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("all")}>
+                <CardContent className="p-4 text-center space-y-3">
+                  <div className="p-3 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
+                    <Database className="h-6 w-6 text-secondary" />
+                  </div>
+          <div>
+                    <h4 className="font-semibold text-foreground text-sm">All Data JSON</h4>
+                    <p className="text-xs text-muted-foreground">Complete backup</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
+
+          {/* Report Generation - Bento Style */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleGenerateReport("download")}>
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="p-4 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
+                  <FileText className="h-8 w-8 text-secondary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground text-lg">Download HTML Report</h4>
+                  <p className="text-sm text-muted-foreground">Generate and download detailed report</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleGenerateReport("print")}>
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="p-4 rounded-xl bg-secondary/20 border border-secondary/30 w-fit mx-auto group-hover:bg-secondary/30 transition-colors duration-200">
+                  <Printer className="h-8 w-8 text-secondary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground text-lg">Print Report</h4>
+                  <p className="text-sm text-muted-foreground">Print directly or save as PDF</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Import Section - Bento Style */}
+          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-base font-semibold">
+                <div className="w-1 h-4 bg-secondary rounded-full"></div>
+                <span>Import Data</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 rounded-lg bg-secondary/20 border border-secondary/30">
+                  <Upload className="h-6 w-6 text-secondary" />
         </div>
-
-        <Separator />
-
-        {/* Export Options */}
-        <div className="space-y-4">
-          <div>
-            <Label className="text-base font-medium">Export Data</Label>
-            <p className="text-sm text-muted-foreground">Download your data in various formats</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <Button
-               onClick={() => handleExportCSV("expenses")}
-               disabled={isExporting}
-               variant="outline"
-               className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-             >
-               <FileSpreadsheet className="h-4 w-4 mr-2" />
-               Export Expenses (Importable CSV)
-             </Button>
-
-             <Button
-               onClick={() => handleExportCSV("budgets")}
-               disabled={isExporting}
-               variant="outline"
-               className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-             >
-               <FileSpreadsheet className="h-4 w-4 mr-2" />
-               Export Budgets (Importable CSV)
-             </Button>
-
-             <Button
-               onClick={() => handleExportCSV("recurring")}
-               disabled={isExporting}
-               variant="outline"
-               className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-             >
-               <FileSpreadsheet className="h-4 w-4 mr-2" />
-               Export Recurring (Importable CSV)
-             </Button>
-
-            <Button
-              onClick={() => handleExportCSV("all")}
-              disabled={isExporting}
-              variant="outline"
-              className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export All Data (JSON)
-            </Button>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Report Generation */}
-        <div className="space-y-4">
-          <div>
-            <Label className="text-base font-medium">Generate Reports</Label>
-            <p className="text-sm text-muted-foreground">Create detailed reports with charts and insights</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              onClick={() => handleGenerateReport("download")}
-              disabled={isExporting}
-              className="bg-secondary hover:bg-secondary/90 justify-start rounded-xl py-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Download HTML Report
-            </Button>
-
-            <Button
-              onClick={() => handleGenerateReport("print")}
-              disabled={isExporting}
-              variant="outline"
-              className="glass bg-transparent justify-start rounded-xl py-3 hover:bg-secondary/10 transition-all duration-200 hover:scale-105"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Print Report
-            </Button>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Import Data */}
-        <div className="space-y-4">
                      <div>
-             <Label className="text-base font-medium">Import Data</Label>
-             <p className="text-sm text-muted-foreground">Import previously exported data (JSON or CSV format)</p>
+                  <h4 className="font-semibold text-foreground">Import from JSON file</h4>
+                  <p className="text-sm text-muted-foreground">Restore your data from a backup</p>
+                </div>
            </div>
-
-                     <div className="flex items-center space-x-4">
-             <Input type="file" accept=".json,.csv" onChange={handleImportData} disabled={isExporting} className="glass rounded-xl" />
+              <p className="text-sm text-muted-foreground">
+                Import expenses, budgets, recurring expenses, and quick add options from a previously exported JSON file.
+              </p>
+              <div className="flex items-center space-x-3">
+                <Input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportData}
+                  className="glass-strong bg-card/20 border-border/30 flex-1 h-11 text-foreground placeholder:text-muted-foreground focus:border-secondary/50 focus:ring-secondary/20"
+                  placeholder="Choose a JSON file to import..."
+                />
              <Button 
-               disabled={isExporting} 
                variant="outline" 
-               className="glass bg-transparent rounded-xl px-6 py-2 hover:bg-secondary/10 transition-all duration-200"
+                  onClick={() => document.getElementById("import-file")?.click()}
+                  className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 hover:bg-secondary/10 text-foreground hover:text-secondary px-6 h-11 transition-all duration-200"
              >
-               <Upload className="h-4 w-4 mr-2" />
-               Import
+                  Browse
              </Button>
            </div>
-        </div>
+            </CardContent>
+          </Card>
 
-        <Separator />
-
-        {/* Data Management */}
-        <div className="space-y-4">
-          <div>
-            <Label className="text-base font-medium">Data Management</Label>
-            <p className="text-sm text-muted-foreground">Manage your data storage</p>
-          </div>
-
+          {/* Data Management - Bento Style */}
+          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center space-x-2 text-base font-semibold">
+                <div className="w-1 h-4 bg-secondary rounded-full"></div>
+                <span>Data Management</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Manage your data storage and perform maintenance operations.
+              </p>
           <div className="flex items-center space-x-4">
             <Button 
               onClick={handleClearAllData}
               disabled={isExporting}
               variant="outline" 
-              className="glass bg-transparent text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl px-6 py-2 transition-all duration-200"
+                  className="glass-strong bg-card/20 border-destructive/30 hover:border-destructive/50 hover:bg-destructive/10 text-destructive hover:text-destructive px-6 py-3 transition-all duration-200"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Clear All Data
             </Button>
           </div>
-        </div>
+            </CardContent>
+          </Card>
 
-        {/* Summary */}
+          {/* Export Summary - Enhanced */}
         {(dateFrom || dateTo) && (
-          <div className="p-4 glass-strong rounded-lg">
-            <div className="text-sm text-muted-foreground">
-              <p>
-                <strong>Selected Period:</strong> {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} -{" "}
-                {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
-              </p>
-              <p>
-                <strong>Expenses in Period:</strong> {getFilteredExpenses().length} transactions
-              </p>
-              <p>
-                <strong>Total Amount:</strong> $
-                {getFilteredExpenses()
-                  .reduce((sum, expense) => sum + expense.amount, 0)
-                  .toLocaleString()}
+            <Card className="glass-strong bg-secondary/10 border-secondary/30 shadow-lg backdrop-blur-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center space-x-2 text-base font-semibold">
+                  <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
+                    <FileText className="h-4 w-4 text-secondary" />
+                  </div>
+                  <span>Export Summary</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="p-3 glass-strong bg-card/20 rounded-lg border border-border/30">
+                    <span className="text-muted-foreground block mb-1">Selected Period</span>
+                    <p className="font-semibold text-foreground">
+                      {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} - {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
+                    </p>
+                  </div>
+                  <div className="p-3 glass-strong bg-card/20 rounded-lg border border-border/30">
+                    <span className="text-muted-foreground block mb-1">Expenses in Period</span>
+                    <p className="font-semibold text-foreground">{getFilteredExpenses().length} transactions</p>
+                  </div>
+                  <div className="p-3 glass-strong bg-card/20 rounded-lg border border-border/30">
+                    <span className="text-muted-foreground block mb-1">Total Amount</span>
+                    <p className="font-semibold text-foreground">
+                      ${getFilteredExpenses().reduce((sum, expense) => sum + expense.amount, 0).toLocaleString()}
               </p>
             </div>
           </div>
+              </CardContent>
+            </Card>
         )}
       </CardContent>
     </Card>
+    </div>
   )
 }

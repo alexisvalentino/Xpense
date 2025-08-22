@@ -196,13 +196,13 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 w-9 p-0 hover:bg-secondary/20 rounded-lg transition-all duration-200"
+          className="h-9 w-9 p-0 hover:bg-secondary/20 rounded-lg transition-all duration-200 glass-strong bg-card/20 border-border/30 hover:border-secondary/50 shadow-lg hover:shadow-xl backdrop-blur-lg"
           data-settings-trigger
         >
-          <Settings className="h-5 w-5" />
+          <Settings className="h-5 w-5 text-secondary" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-modal bg-card/40 border-border/50 shadow-2xl backdrop-blur-xl">
         <DialogHeader className="pb-6">
           <DialogTitle className="text-xl font-bold">Quick Add Options</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">Manage your quick add buttons for faster expense entry</p>
@@ -210,7 +210,7 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
         
         <div className="space-y-6">
           {/* Add/Edit Form */}
-          <div className="space-y-4 sm:space-y-5 p-4 sm:p-6 bg-background/30 rounded-xl border border-secondary/10">
+          <div className="space-y-4 sm:space-y-5 p-4 sm:p-6 glass-strong bg-card/20 rounded-xl border border-border/30 shadow-lg backdrop-blur-lg">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-lg">
                 {editingOption ? "Edit Option" : "Add New Option"}

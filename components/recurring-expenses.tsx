@@ -195,35 +195,29 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
   }
 
   return (
-    <Card className="glass">
-      <CardHeader>
+    <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
+      <CardHeader className="pb-4 md:pb-6">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <Repeat className="h-5 w-5 text-secondary" />
+          <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
+            <div className="p-2 md:p-3 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/30">
+              <Repeat className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+            </div>
             <span>Recurring Expenses</span>
           </CardTitle>
-          <Button 
-            onClick={() => setShowForm(true)} 
-            size="sm" 
-            className="bg-secondary hover:bg-secondary/90 rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Recurring
-          </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {/* Form */}
         {showForm && (
-          <Card className="glass-strong">
-            <CardHeader>
-              <CardTitle className="text-lg">
+          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg md:text-xl">
                 {editingRecurring ? "Edit Recurring Expense" : "Add Recurring Expense"}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="recurring-amount">Amount</Label>
                     <Input
@@ -233,7 +227,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="glass"
+                      className="glass-strong bg-card/20 border-border/30"
                       required
                     />
                   </div>
@@ -243,7 +237,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                       value={frequency}
                       onValueChange={(value: RecurringExpense["frequency"]) => setFrequency(value)}
                     >
-                      <SelectTrigger className="glass">
+                      <SelectTrigger className="glass-strong bg-card/20 border-border/30">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="glass-dropdown">
@@ -267,7 +261,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                 <div className="space-y-2">
                   <Label htmlFor="recurring-category">Category</Label>
                   <Select value={category} onValueChange={setCategory} required>
-                    <SelectTrigger className="glass">
+                    <SelectTrigger className="glass-strong bg-card/20 border-border/30">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent className="glass-dropdown">
@@ -290,7 +284,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                     placeholder="e.g., Netflix subscription"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="glass"
+                    className="glass-strong bg-card/20 border-border/30"
                     required
                   />
                 </div>
@@ -298,15 +292,15 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                 <div className="flex space-x-3 pt-4">
                   <Button 
                     type="submit" 
-                    className="flex-1 bg-secondary hover:bg-secondary/90 rounded-full py-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="flex-1 bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
                   >
-                    {editingRecurring ? "Update" : "Add"} Recurring Expense
+                    {editingRecurring ? "Update" : "Add Recurring Expense"}
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={resetForm} 
-                    className="flex-1 glass bg-transparent rounded-full py-2 hover:bg-secondary/10 transition-all duration-200"
+                    className="flex-1 glass-strong bg-card/20 border-border/30 rounded-xl py-3 md:py-4 h-12 md:h-14 hover:bg-secondary/10 transition-all duration-200 text-base md:text-lg font-semibold"
                   >
                     Cancel
                   </Button>
@@ -352,7 +346,6 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                             <Switch
                               checked={recurring.isActive}
                               onCheckedChange={() => handleToggleActive(recurring)}
-                              size="sm"
                             />
                             <span className="text-xs text-muted-foreground">
                               {recurring.isActive ? "Active" : "Paused"}
@@ -363,8 +356,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
                           {recurring.isActive && (dueStatus.status === "overdue" || dueStatus.status === "due") && (
                             <Button
                               onClick={() => handleExecuteRecurring(recurring)}
-                              size="sm"
-                              className="bg-secondary hover:bg-secondary/90 rounded-full px-4 py-1 shadow-md hover:shadow-lg transition-all duration-200"
+                              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation text-sm font-semibold"
                             >
                               Add Now
                             </Button>
@@ -402,9 +394,9 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading }: 
             <p className="text-muted-foreground mb-4">Set up recurring expenses like subscriptions and bills</p>
             <Button 
               onClick={() => setShowForm(true)} 
-              className="bg-secondary hover:bg-secondary/90 rounded-full px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full sm:w-auto h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
               Add Your First Recurring Expense
             </Button>
           </div>

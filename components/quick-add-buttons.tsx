@@ -79,20 +79,20 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
   }
 
   return (
-    <Card className="glass">
-      <CardHeader className="pb-4 md:pb-6">
-        <CardTitle className="flex items-center justify-between text-lg md:text-xl font-bold">
-          <div className="flex items-center space-x-3">
-            <Plus className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+    <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
+      <CardHeader className="pb-3 md:pb-4">
+        <CardTitle className="flex items-center justify-between text-base md:text-lg font-semibold">
+          <div className="flex items-center space-x-2">
+            <Plus className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
             <span>Quick Add</span>
           </div>
           <QuickAddEditModal onOptionsChange={handleOptionsChange} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 md:p-6">
+      <CardContent className="p-3 md:p-4">
         {options.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="space-y-6">
+          <div className="text-center py-8">
+            <div className="space-y-4">
               <Button 
                 onClick={() => {
                   // Trigger the edit modal to open
@@ -101,14 +101,14 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
                     settingsButton.click()
                   }
                 }}
-                className="h-20 w-20 mx-auto rounded-full bg-secondary/20 hover:bg-secondary/30 flex items-center justify-center transition-all duration-200 hover:scale-110 border-2 border-secondary/30 hover:border-secondary/50"
+                className="h-16 w-16 mx-auto rounded-full glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl backdrop-blur-lg"
               >
-                <Plus className="h-10 w-10 text-secondary" />
+                <Plus className="h-8 w-8 text-secondary" />
               </Button>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="text-muted-foreground">
-                  <p className="text-lg font-medium">No quick add options configured</p>
-                  <p className="text-base">Click the plus icon to create your first quick add option</p>
+                  <p className="text-sm font-medium">No quick add options configured</p>
+                  <p className="text-xs">Click the plus icon to create your first quick add option</p>
                 </div>
               </div>
             </div>
@@ -117,7 +117,7 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
           <>
             {/* Mobile: Horizontal scrollable list */}
             <div className="md:hidden">
-              <div className="flex space-x-4 overflow-x-auto pb-3 scrollbar-hide">
+              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
                 {options.slice(0, 5).map((option) => {
                   const IconComponent = getIconComponent(option.icon)
                   return (
@@ -125,13 +125,13 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
                       key={option.id}
                       onClick={() => handleQuickAdd(option)}
                       variant="outline"
-                      className="glass bg-transparent flex flex-col items-center space-y-3 h-auto py-4 px-5 min-w-[90px] hover:bg-secondary/10 flex-shrink-0 rounded-xl transition-all duration-200 hover:scale-105"
+                      className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex flex-col items-center space-y-2 h-auto py-4 px-4 min-w-[90px] hover:bg-secondary/10 flex-shrink-0 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl backdrop-blur-lg"
                     >
                       <div className="h-5 w-5 text-secondary">
                         <IconComponent className="h-5 w-5" />
                       </div>
                       <div className="text-center">
-                        <div className="text-sm font-semibold">{option.label}</div>
+                        <div className="text-sm font-semibold text-foreground">{option.label}</div>
                         <div className="text-xs text-muted-foreground">${option.amount}</div>
                       </div>
                     </Button>
@@ -149,13 +149,13 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
                     key={option.id}
                     onClick={() => handleQuickAdd(option)}
                     variant="outline"
-                    className="glass bg-transparent flex flex-col items-center space-y-3 h-auto py-6 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl"
+                    className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex flex-col items-center space-y-3 h-auto py-6 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl shadow-lg hover:shadow-xl backdrop-blur-lg"
                   >
                     <div className="h-6 w-6 text-secondary">
                       <IconComponent className="h-6 w-6" />
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-semibold">{option.label}</div>
+                      <div className="text-sm font-semibold text-foreground">{option.label}</div>
                       <div className="text-xs text-muted-foreground">${option.amount}</div>
                     </div>
                   </Button>

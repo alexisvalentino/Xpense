@@ -301,8 +301,20 @@ export default function ExpenseTracker() {
                   </CardContent>
                 </Card>
 
+                {/* Add Expense Button - Balanced prominence */}
+                <div className="lg:col-span-2 flex items-center justify-center">
+                  <Button
+                    onClick={() => setShowForm(true)}
+                    className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
+                    size="lg"
+                  >
+                    <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                    Add Expense
+                  </Button>
+                </div>
+
                 {filteredExpenses.length > 0 && (
-                  <Card className="glass lg:col-span-2">
+                  <Card className="glass lg:col-span-3">
                     <CardHeader className="pb-2 md:pb-4">
                       <CardTitle className="flex items-center space-x-2 text-base md:text-lg">
                         <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
@@ -316,23 +328,10 @@ export default function ExpenseTracker() {
                 )}
               </div>
 
-              {/* Quick Add Buttons */}
+              {/* Quick Add Buttons - Now secondary priority */}
               <QuickAddButtons 
                 onQuickAdd={addExpense} 
               />
-
-
-
-              <div className="flex justify-center">
-                <Button
-                  onClick={() => setShowForm(true)}
-                  className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-full w-full sm:w-auto h-12 md:h-14 text-base md:text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                  size="lg"
-                >
-                  <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                  Add Expense
-                </Button>
-              </div>
 
               {/* Recent/Filtered Expenses */}
               {filteredExpenses.length > 0 && (
@@ -340,7 +339,7 @@ export default function ExpenseTracker() {
                   <CardHeader className="pb-2 md:pb-4">
                     <CardTitle className="flex items-center space-x-2 text-base md:text-lg">
                       <Calendar className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
-                                              <span>Recent Expenses</span>
+                      <span>Recent Expenses</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-2 md:p-6">
@@ -395,6 +394,17 @@ export default function ExpenseTracker() {
               </Card>
             </div>
           )}
+
+          {/* Mobile Floating Action Button */}
+          <div className="md:hidden fixed bottom-6 right-6 z-40">
+            <Button
+              onClick={() => setShowForm(true)}
+              className="h-14 w-14 rounded-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 float-animation"
+              size="lg"
+            >
+              <Plus className="h-6 w-6" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

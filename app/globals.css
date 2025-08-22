@@ -110,7 +110,11 @@
     @apply backdrop-blur-xl bg-card/30 border-r border-border/30 shadow-2xl;
   }
   
-  /* Mobile scrollbar hiding */
+  /* Mobile-first improvements */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -118,6 +122,25 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  
+  /* Mobile floating action button animations */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Mobile-safe area padding */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
   }
   
   /* Mobile touch improvements */
