@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Settings, Plus, Trash2, GripVertical, Coffee, Utensils, Car, ShoppingBag, Zap, Home, Heart, Gamepad2, BookOpen, Plane, Train, Bus, Bike, Wifi, Phone, Tv, Music, Camera, Gift, Star } from "lucide-react"
 import type { QuickAddOption } from "@/lib/db"
 import { iconMap, categoryOptions, getQuickAddOptionsWithSmartDefaults, addQuickAddOption, updateQuickAddOption, deleteQuickAddOption, reorderQuickAddOptions, clearAllQuickAddOptions } from "@/lib/quick-add-utils"
+import { getCategoryColor } from "@/lib/category-colors"
 
 interface QuickAddEditModalProps {
   onOptionsChange: () => void
@@ -230,12 +231,12 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
               <div className="space-y-2">
                 <Label htmlFor="icon" className="text-sm font-medium">Icon</Label>
                 <Select value={formData.icon} onValueChange={(value) => setFormData({ ...formData, icon: value })}>
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="glass h-10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="max-h-60">
+                  <SelectContent className="glass-dropdown max-h-60">
                     {Object.entries(iconMap).map(([key, value]) => (
-                      <SelectItem key={key} value={key}>
+                      <SelectItem key={key} value={key} className="glass-dropdown-item">
                         {value}
                       </SelectItem>
                     ))}
@@ -250,7 +251,7 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                   placeholder="e.g., Coffee"
-                  className="h-10"
+                  className="glass h-10"
                 />
               </div>
             </div>
@@ -265,20 +266,23 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   placeholder="0.00"
-                  className="h-10"
+                  className="glass h-10"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="category" className="text-sm font-medium">Category</Label>
                 <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="glass h-10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="max-h-60">
+                  <SelectContent className="glass-dropdown max-h-60">
                     {categoryOptions.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                      <SelectItem key={category} value={category} className="glass-dropdown-item">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(category) }} />
+                          {category}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -288,13 +292,13 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
             
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-medium">Description</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="e.g., Morning coffee"
-                className="h-10"
-              />
+                              <Input
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="e.g., Morning coffee"
+                  className="glass h-10"
+                />
             </div>
             
             <div className="flex pt-3">
@@ -361,7 +365,10 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
                         </div>
                         <div className="flex flex-col min-w-0">
                           <span className="text-sm font-medium truncate">{option.label}</span>
-                          <span className="text-xs text-muted-foreground truncate">{option.category}</span>
+                          <div className="flex items-center gap-1">
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: getCategoryColor(option.category) }} />
+                            <span className="text-xs text-muted-foreground truncate">{option.category}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
