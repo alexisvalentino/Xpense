@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
 import { 
   Menu, 
@@ -156,9 +156,11 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
                   </span>
                 )}
               </Button>
-              <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
-                <SheetContent side="right" className="glass-modal w-[360px] p-0">
-                  <div className="p-4 border-b border-border/30">
+                             <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
+                 <SheetContent side="right" className="glass-modal w-[360px] p-0">
+                   <SheetTitle className="sr-only">Notifications</SheetTitle>
+                   <SheetDescription className="sr-only">Notifications panel for Xpense application</SheetDescription>
+                   <div className="p-4 border-b border-border/30">
                     <h3 className="font-semibold">Notifications</h3>
                   </div>
                   <div className="p-4 space-y-3 overflow-y-auto max-h-[80vh]">
@@ -184,11 +186,11 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
 
   // Mobile Top Header
   const MobileHeader = () => (
-    <div className="md:hidden sticky top-0 z-50 glass-strong border-b border-border/30 backdrop-blur-xl">
+    <div className="md:hidden fixed top-0 left-0 right-0 z-50 glass-strong border-b border-border/30 backdrop-blur-xl bg-background/60 shadow-lg">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo and Title */}
         <div className="flex items-center space-x-3">
-          <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-sm">
+          <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10">
             <img src="/x-logo.svg" alt="Xpense Logo" className="h-5 w-5" />
           </div>
           <div>
@@ -203,7 +205,7 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20"
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20 backdrop-blur-sm"
             onClick={() => setIsMobileSearchOpen(true)}
           >
             <Search className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -213,7 +215,7 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20 relative"
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20 relative backdrop-blur-sm"
             onClick={() => setIsNotifOpen(true)}
           >
             <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -223,25 +225,7 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
               </span>
             )}
           </Button>
-          <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
-            <SheetContent side="right" className="glass-modal w-[360px] p-0">
-              <div className="p-4 border-b border-border/30">
-                <h3 className="font-semibold">Notifications</h3>
-              </div>
-              <div className="p-4 space-y-3 overflow-y-auto max-h-[70vh]">
-                {notifications.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No notifications</div>
-                ) : (
-                  notifications.map((n) => (
-                    <div key={n.id} className={`p-3 rounded-lg glass ${n.severity === 'danger' ? 'border border-red-500/30' : n.severity === 'warning' ? 'border border-amber-500/30' : 'border border-border/30'}`}>
-                      <div className="text-sm font-medium">{n.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{n.message}</div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+
           
 
           
@@ -251,15 +235,17 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20"
+                className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20 backdrop-blur-sm"
               >
                 <Menu className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="glass-modal w-[300px] sm:w-[350px] p-0">
-              <div className="h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border/30">
+                         <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
+               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+               <SheetDescription className="sr-only">Mobile navigation menu for Xpense application</SheetDescription>
+               <div className="h-full flex flex-col">
+                 {/* Header */}
+                 <div className="flex items-center justify-between p-6 border-b border-border/30">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 rounded-lg bg-black/20 backdrop-blur-sm">
                       <img src="/x-logo.svg" alt="Xpense Logo" className="h-6 w-6" />
@@ -269,11 +255,11 @@ export function ResponsiveNavigation({ activeTab, onTabChange, searchQuery = "",
                       <p className="text-sm text-muted-foreground">Smart Finance</p>
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setIsOpen(false)} 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-8 w-8 p-0 hover:bg-secondary/20"
+                    onClick={() => setIsOpen(false)}
                   >
                     <X className="h-4 w-4" />
                   </Button>

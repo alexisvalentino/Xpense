@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Plus, DollarSign, TrendingUp, Calendar, Undo2 } from "lucide-react"
 import { ExpenseForm } from "@/components/expense-form"
 import { ExpenseChart } from "@/components/expense-chart"
@@ -316,7 +317,7 @@ export default function ExpenseTracker() {
         notifications={notifications}
       />
       <div className="md:ml-64">
-        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6 max-w-7xl pb-safe md:pt-24">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4 md:space-y-6 max-w-7xl pb-safe pt-16 md:pt-24">
           <ResponsiveHeader />
 
           {activeTab === "budgets" ? (
@@ -469,24 +470,25 @@ export default function ExpenseTracker() {
             </div>
           )}
 
-          {showForm && (
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center p-4 z-50">
-              <Card className="glass-modal w-full max-w-md mx-4">
-                <CardHeader className="pb-2 md:pb-4">
-                  <CardTitle className="text-base md:text-lg">
-                    {editingExpense ? "Edit Expense" : "Add New Expense"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 md:p-6">
-                  <ExpenseForm
-                    onSubmit={editingExpense ? editExpense : addExpense}
-                    onCancel={handleFormCancel}
-                    editExpense={editingExpense || undefined}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogContent className="w-full max-w-md glass-modal bg-card/40 border-border/50 shadow-2xl backdrop-blur-xl">
+              <DialogHeader className="pb-2 md:pb-4">
+                <DialogTitle className="text-base md:text-lg">
+                  {editingExpense ? "Edit Expense" : "Add New Expense"}
+                </DialogTitle>
+                <DialogDescription className="mt-1">
+                  {editingExpense ? "Update your expense details" : "Add a new expense to your tracker"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="p-4 md:p-6">
+                <ExpenseForm
+                  onSubmit={editingExpense ? editExpense : addExpense}
+                  onCancel={handleFormCancel}
+                  editExpense={editingExpense || undefined}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Mobile Floating Action Button */}
           <div className="md:hidden fixed bottom-6 right-6 z-40">

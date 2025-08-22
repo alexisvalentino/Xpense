@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
 import { Settings, Plus, Trash2, GripVertical, Coffee, Utensils, Car, ShoppingBag, Zap, Home, Heart, Gamepad2, BookOpen, Plane, Train, Bus, Bike, Wifi, Phone, Tv, Music, Camera, Gift, Star } from "lucide-react"
 import type { QuickAddOption } from "@/lib/db"
 import { iconMap, categoryOptions, getQuickAddOptionsWithSmartDefaults, addQuickAddOption, updateQuickAddOption, deleteQuickAddOption, reorderQuickAddOptions, clearAllQuickAddOptions } from "@/lib/quick-add-utils"
@@ -205,7 +205,7 @@ export function QuickAddEditModal({ onOptionsChange }: QuickAddEditModalProps) {
       <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto glass-modal bg-card/40 border-border/50 shadow-2xl backdrop-blur-xl">
         <DialogHeader className="pb-6">
           <DialogTitle className="text-xl font-bold">Quick Add Options</DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">Manage your quick add buttons for faster expense entry</p>
+          <DialogDescription className="mt-1">Manage your quick add buttons for faster expense entry</DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
