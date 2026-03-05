@@ -10,12 +10,12 @@ import { Search, Filter, X, Calendar, DollarSign } from "lucide-react"
 import { getCategoryColor } from "@/lib/category-colors"
 
 export interface FilterOptions {
-  search: string
-  category: string
-  dateFrom: string
-  dateTo: string
-  minAmount: string
-  maxAmount: string
+  search?: string;
+  category?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  minAmount?: string;
+  maxAmount?: string;
 }
 
 interface ExpenseFiltersProps {

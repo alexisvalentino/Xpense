@@ -6,6 +6,7 @@ import { getCategoryColor } from "@/lib/category-colors"
 
 interface ExpenseChartProps {
   expenses: Expense[]
+  compact?: boolean
 }
 
 interface TooltipProps {
@@ -17,15 +18,15 @@ interface TooltipProps {
 }
 
 interface LabelProps {
-  cx: number
-  cy: number
-  midAngle: number
-  innerRadius: number
-  outerRadius: number
-  percent: number
+  cx?: number
+  cy?: number
+  midAngle?: number
+  innerRadius?: number
+  outerRadius?: number
+  percent?: number
 }
 
-export function ExpenseChart({ expenses }: ExpenseChartProps) {
+export function ExpenseChart({ expenses, compact = false }: ExpenseChartProps) {
   // Group expenses by category
   const categoryData = expenses.reduce(
     (acc, expense) => {
@@ -50,9 +51,9 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0]
       return (
-        <div className="glass-strong p-3 rounded-lg">
-          <p className="text-foreground font-medium">{data.name}</p>
-          <p className="text-secondary font-bold">${data.value.toLocaleString()}</p>
+        <div className="glass-strong p-2 rounded-lg border border-white/10 shadow-xl backdrop-blur-md">
+          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{data.name}</p>
+          <p className="text-sm font-black text-secondary">${data.value.toLocaleString()}</p>
         </div>
       )
     }
@@ -60,7 +61,8 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
   }
 
   const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: LabelProps) => {
-    if (percent < 0.05) return null // Don't show labels for slices less than 5%
+    if (cx === undefined || cy === undefined || midAngle === undefined || innerRadius === undefined || outerRadius === undefined || percent === undefined) return null
+    if (percent < 0.1 || compact) return null // Hide labels in compact mode
 
     const RADIAN = Math.PI / 180
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5
@@ -74,7 +76,7 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
         fill="white"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
-        className="text-sm font-medium"
+        className="text-[10px] font-bold"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
@@ -82,7 +84,7 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
   }
 
   return (
-    <div className="h-80">
+    <div className={compact ? "h-full w-full" : "h-80"}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -91,9 +93,9 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
             cy="50%"
             labelLine={false}
             label={renderCustomLabel}
-            outerRadius={100}
-            innerRadius={40}
-            fill="#8884d8"
+            outerRadius={compact ? 60 : 100}
+            innerRadius={compact ? 35 : 40}
+            stroke="none"
             dataKey="value"
           >
             {categoryData.map((entry, index) => (
@@ -101,12 +103,14 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{
-              paddingTop: "20px",
-              color: "hsl(var(--foreground))",
-            }}
-          />
+          {!compact && (
+            <Legend
+              wrapperStyle={{
+                paddingTop: "20px",
+                color: "hsl(var(--foreground))",
+              }}
+            />
+          )}
         </PieChart>
       </ResponsiveContainer>
     </div>

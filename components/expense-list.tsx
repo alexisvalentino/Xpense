@@ -27,18 +27,18 @@ export function ExpenseList({ expenses, onDelete, onEdit, isLoading = false }: E
   return (
     <div className="space-y-3">
       {expenses.map((expense) => (
-        <div key={expense.id} className="glass rounded-lg overflow-hidden">
+        <div key={expense.id} className="glass rounded-xl overflow-hidden border-white/5 shadow-sm transition-all hover:bg-card/30">
           {/* Mobile: Stacked layout, Desktop: Side by side */}
-          <div className="p-4 md:p-5">
+          <div className="p-3 md:p-4">
             {/* Header Row */}
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center justify-between mb-1.5">
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-foreground text-base md:text-lg truncate">
+                <h4 className="font-semibold text-foreground text-sm md:text-base truncate">
                   {expense.description}
                 </h4>
               </div>
               <div className="ml-3 text-right">
-                <span className="text-lg md:text-xl font-bold text-secondary">
+                <span className="text-base md:text-lg font-black text-secondary">
                   ${expense.amount.toLocaleString()}
                 </span>
               </div>
@@ -46,50 +46,40 @@ export function ExpenseList({ expenses, onDelete, onEdit, isLoading = false }: E
 
             {/* Details Row */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Tag className="h-3 w-3" />
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-2.5 h-2.5 rounded-full" 
-                      style={{ backgroundColor: getCategoryColor(expense.category) }} 
-                    />
-                    <span className="hidden sm:inline">{expense.category}</span>
-                    <span className="sm:hidden">{expense.category.split(' ')[0]}</span>
-                  </div>
+              <div className="flex items-center space-x-3 text-[10px] md:text-xs text-muted-foreground/70">
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: getCategoryColor(expense.category) }}
+                  />
+                  <span>{expense.category}</span>
                 </div>
-                <span className="hidden sm:inline">•</span>
+                <span>•</span>
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span className="hidden sm:inline">
-                    {new Date(expense.date).toLocaleDateString()}
-                  </span>
-                  <span className="sm:hidden">
-                    {new Date(expense.date).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
+                  <Calendar className="h-2.5 w-2.5" />
+                  <span>
+                    {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onEdit(expense)}
-                  className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-colors"
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3 w-3" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onDelete(expense.id)}
-                  className="h-9 w-9 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  className="h-7 w-7 p-0 text-destructive/60 hover:text-destructive hover:bg-destructive/5 transition-colors"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
             </div>

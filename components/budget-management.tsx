@@ -161,205 +161,179 @@ export function BudgetManagement({ expenses, isLoading: externalLoading, budgets
   }
 
   return (
-    <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
-      <CardHeader className="pb-4 md:pb-6">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-            <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-            <span>Budget Management</span>
-          </CardTitle>
-          {!showForm && (
-            <Button 
-              onClick={() => setShowForm(true)}
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-xl h-10 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 border border-secondary/30 hover:border-secondary/50"
+    <div className="space-y-6">
+      {/* Header with Control */}
+      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl shrink-0">
+        <CardHeader className="p-4 md:pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardTitle className="flex items-center space-x-3 text-lg md:text-xl font-bold">
+              <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
+              <span>Budget Control Center</span>
+            </CardTitle>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              variant={showForm ? "ghost" : "outline"}
+              size="sm"
+              className={`rounded-full px-4 h-9 transition-all duration-300 w-full sm:w-auto ${showForm
+                ? "text-muted-foreground hover:bg-card/20"
+                : "bg-secondary/10 border-secondary/30 text-secondary hover:bg-secondary/20"
+                }`}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Budget
+              {showForm ? "Close Form" : <><Plus className="h-4 w-4 mr-2" /> New Limit</>}
             </Button>
-          )}
-        </div>
-        <p className="text-sm md:text-base text-muted-foreground">
-          Set spending limits and track your budget progress across different categories
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Add/Edit Budget Form */}
+          </div>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">Keep your spending in check by setting category-based limits.</p>
+        </CardHeader>
+
         {showForm && (
-          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg md:text-xl">
-                {editingBudget ? "Edit Budget" : "Add New Budget"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="budget-category">Category</Label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger className="glass-strong bg-card/20 border-border/30">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent className="glass-dropdown">
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat} className="glass-dropdown-item">
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="budget-limit">Monthly Limit ($)</Label>
-                    <Input
-                      id="budget-limit"
-                      type="number"
-                      step="0.01"
-                      value={limit}
-                      onChange={(e) => setLimit(e.target.value)}
-                      placeholder="0.00"
-                      className="glass-strong bg-card/20 border-border/30"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="budget-period">Period</Label>
-                  <Select value={period} onValueChange={(value: Budget["period"]) => setPeriod(value)}>
-                    <SelectTrigger className="glass-strong bg-card/20 border-border/30">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="glass-dropdown">
-                      <SelectItem value="weekly" className="glass-dropdown-item">
-                        Weekly
-                      </SelectItem>
-                      <SelectItem value="monthly" className="glass-dropdown-item">
-                        Monthly
-                      </SelectItem>
-                      <SelectItem value="yearly" className="glass-dropdown-item">
-                        Yearly
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex space-x-3 pt-4">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
-                  >
-                    {editingBudget ? "Update Budget" : "Add Budget"}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={resetForm} 
-                    className="flex-1 glass-strong bg-card/20 border-border/30 rounded-xl py-3 md:py-4 h-12 md:h-14 hover:bg-secondary/10 transition-all duration-200 text-base md:text-lg font-semibold"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Budget Progress List */}
-        {budgetProgress.length > 0 ? (
-          <div className="space-y-4">
-            {budgetProgress.map((progress) => (
-              <Card key={progress.budget.id} className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
-                <CardContent className="p-4 md:p-6">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: getCategoryColor(progress.budget.category) }}
-                        />
-                        <h4 className="font-semibold text-foreground text-base md:text-lg">{progress.budget.category}</h4>
-                        <Badge variant="outline" className="text-xs glass-strong bg-card/20 border-border/30">
-                          {formatPeriod(progress.budget.period)}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          onClick={() => handleEdit(progress.budget)} 
-                          variant="ghost" 
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-lg hover:bg-secondary/20 transition-all duration-200 glass-strong bg-card/20 border-border/30"
-                        >
-                          <Edit className="h-4 w-4 text-secondary" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDelete(progress.budget.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/20 transition-all duration-200 glass-strong bg-card/20 border-border/30"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+          <CardContent className="p-4 md:pb-8">
+            <Card className="glass-strong bg-secondary/5 border-secondary/20 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="p-1 bg-secondary/10 border-b border-secondary/10">
+                <span className="text-[10px] uppercase tracking-widest font-bold px-3 py-1 block">Budget Configuration</span>
+              </div>
+              <CardContent className="p-4 md:p-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-bold">Category</Label>
+                      <Select value={category} onValueChange={setCategory}>
+                        <SelectTrigger className="glass-strong bg-card/10 border-border/20 h-11">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent className="glass-dropdown">
+                          {getAvailableCategories().map(cat => (
+                            <SelectItem key={cat} value={cat} className="glass-dropdown-item">{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm md:text-base">
-                        <span className="text-muted-foreground">
-                          ${progress.spent.toLocaleString()} of ${progress.budget.limit.toLocaleString()}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          {progress.status === "safe" && <CheckCircle className="h-4 w-4 text-green-500" />}
-                          {(progress.status === "warning" ||
-                            progress.status === "danger" ||
-                            progress.status === "exceeded") && <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                          <span className="font-semibold" style={{ color: getBudgetStatusColor(progress.status) }}>
-                            {progress.percentage.toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                      <Progress
-                        value={progress.percentage}
-                        className="h-3"
-                        style={{
-                          backgroundColor: "rgba(255,255,255,0.1)",
-                        }}
+                    <div className="space-y-2">
+                      <Label className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-bold">Limit ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={limit}
+                        onChange={(e) => setLimit(e.target.value)}
+                        placeholder="0.00"
+                        className="glass-strong bg-card/10 border-border/20 h-11"
+                        required
                       />
-                      {progress.remaining > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          ${progress.remaining.toLocaleString()} remaining
-                        </p>
-                      )}
-                      {progress.status === "exceeded" && (
-                        <p className="text-sm text-red-500 font-medium">
-                          Over budget by ${(progress.spent - progress.budget.limit).toLocaleString()}
-                        </p>
-                      )}
+                    </div>
+                    <div className="space-y-2 sm:col-span-2 md:col-span-1">
+                      <Label className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground font-bold">Period</Label>
+                      <Select value={period} onValueChange={(v: any) => setPeriod(v)}>
+                        <SelectTrigger className="glass-strong bg-card/10 border-border/20 h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="glass-dropdown">
+                          {["weekly", "monthly", "yearly"].map(p => (
+                            <SelectItem key={p} value={p} className="capitalize glass-dropdown-item">{p}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Target className="h-10 w-10 text-secondary mx-auto mb-6" />
-            <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3">No budgets set</h3>
-            <p className="text-muted-foreground mb-6 text-base md:text-lg">
-              Create your first budget to start tracking your spending limits
-            </p>
-            <Button 
-              onClick={() => setShowForm(true)} 
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full sm:w-auto h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
-            >
-              <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-              Add Your First Budget
-            </Button>
-          </div>
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
+                    <Button type="button" variant="ghost" onClick={resetForm} className="h-10 px-6 w-full sm:w-auto">Cancel</Button>
+                    <Button type="submit" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground h-10 px-8 rounded-lg shadow-lg shadow-secondary/20 w-full sm:w-auto font-bold">
+                      {editingBudget ? "Save Changes" : "Create Budget"}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </CardContent>
         )}
-      </CardContent>
-    </Card>
+      </Card>
+
+      {/* Bento Grid of Budget Progress */}
+      {budgetProgress.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {budgetProgress.map((progress) => (
+            <Card key={progress.budget.id} className="relative glass-strong bg-card/20 border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
+              {/* Status Indicator Bar */}
+              <div
+                className="absolute top-0 left-0 w-full h-1 transition-opacity opacity-70"
+                style={{ backgroundColor: getBudgetStatusColor(progress.status) }}
+              />
+
+              <CardContent className="p-4 md:p-5 flex flex-col h-full">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 md:p-2 rounded-xl bg-card/20 border border-border/10 backdrop-blur-md">
+                      <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: getCategoryColor(progress.budget.category) }} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm md:text-base text-foreground line-clamp-1">{progress.budget.category}</h4>
+                      <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{formatPeriod(progress.budget.period)}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <Button onClick={() => handleEdit(progress.budget)} variant="secondary" size="sm" className="h-7 w-7 p-0 rounded-full bg-secondary/20 hover:bg-secondary/40"><Edit className="h-3 w-3" /></Button>
+                    <Button onClick={() => handleDelete(progress.budget.id)} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-destructive/20 text-destructive"><Trash2 className="h-3 w-3" /></Button>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-baseline justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-xl md:text-2xl font-black text-foreground">${progress.spent.toLocaleString()}</span>
+                      <span className="text-[9px] md:text-[10px] text-muted-foreground uppercase font-black tracking-tighter">Spent so far</span>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <span className="text-[10px] md:text-sm font-bold text-muted-foreground uppercase opacity-60">of ${progress.budget.limit.toLocaleString()}</span>
+                      <Badge variant="outline" className={`text-[10px] border-none font-black mt-1 ${progress.status === 'safe' ? 'text-green-500 bg-green-500/10' :
+                        progress.status === 'warning' ? 'text-amber-500 bg-amber-500/10' :
+                          'text-red-500 bg-red-500/10'
+                        }`}>
+                        {progress.percentage.toFixed(0)}%
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Progress
+                      value={progress.percentage}
+                      className="h-2 rounded-full overflow-hidden bg-card/30"
+                      style={{
+                        ['--progress-foreground' as any]: getBudgetStatusColor(progress.status)
+                      } as React.CSSProperties}
+                    />
+                    <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground italic tracking-tight">
+                      {progress.remaining > 0 ? (
+                        <span>${progress.remaining.toLocaleString()} left in budget</span>
+                      ) : (
+                        <span className="text-red-500 font-black">Over by ${(progress.spent - progress.budget.limit).toLocaleString()}</span>
+                      )}
+                      <div className="flex items-center gap-1">
+                        {progress.status === "safe" && <CheckCircle className="h-3 w-3 text-green-500" />}
+                        {(progress.status === "warning" || progress.status === "danger" || progress.status === "exceeded") &&
+                          <AlertTriangle className="h-3 w-3 text-amber-500" />
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="glass-strong bg-card/10 border-border/20 h-64 border-dashed">
+          <CardContent className="flex flex-col items-center justify-center h-full text-center space-y-4">
+            <div className="p-4 rounded-full bg-muted/10 border border-muted/20">
+              <Target className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">No Constraints</h3>
+              <p className="text-sm text-muted-foreground max-w-[200px]">Define your first budget to stay on top of your finances.</p>
+            </div>
+            <Button onClick={() => setShowForm(true)} variant="outline" className="h-10 rounded-full border-secondary/30 text-secondary hover:bg-secondary/10">
+              Set Your First Budget
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, Upload, Trash2, Database } from "lucide-react"
 import { expenseDB } from "@/lib/db"
 import type { Expense } from "@/lib/db"
+import { useToast } from "@/components/ui/toast"
+import { ConfirmationModal } from "@/components/ui/confirmation-modal"
 
 interface DataManagementProps {
   expenses: Expense[]
@@ -16,6 +18,8 @@ export function DataManagement({ expenses, onDataImported }: DataManagementProps
   const [isExporting, setIsExporting] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const { toast } = useToast()
 
   const handleExport = async () => {
     setIsExporting(true)
@@ -30,8 +34,17 @@ export function DataManagement({ expenses, onDataImported }: DataManagementProps
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
+      toast({
+        message: "Export successful",
+        description: "Your data has been exported to a JSON file.",
+        type: "success",
+      })
     } catch (error) {
       console.error("Export failed:", error)
+      toast({
+        message: "Export failed",
+        type: "error",
+      })
     } finally {
       setIsExporting(false)
     }
@@ -51,8 +64,18 @@ export function DataManagement({ expenses, onDataImported }: DataManagementProps
         await expenseDB.importData(text)
         const importedExpenses = await expenseDB.getAllExpenses()
         onDataImported(importedExpenses)
+        toast({
+          message: "Import successful",
+          description: "Data has been updated.",
+          type: "success",
+        })
       } catch (error) {
         console.error("Import failed:", error)
+        toast({
+          message: "Import failed",
+          description: "Invalid format.",
+          type: "error",
+        })
       } finally {
         setIsImporting(false)
       }
@@ -61,18 +84,28 @@ export function DataManagement({ expenses, onDataImported }: DataManagementProps
   }
 
   const handleClearData = async () => {
-    if (!confirm("Are you sure you want to delete all expense data? This cannot be undone.")) {
-      return
-    }
+    setIsConfirmOpen(true)
+  }
 
+  const confirmClearData = async () => {
     setIsClearing(true)
     try {
       await expenseDB.clearAllData()
       onDataImported([])
+      toast({
+        message: "Data cleared",
+        description: "All records have been removed.",
+        type: "info",
+      })
     } catch (error) {
       console.error("Clear data failed:", error)
+      toast({
+        message: "Action failed",
+        type: "error",
+      })
     } finally {
       setIsClearing(false)
+      setIsConfirmOpen(false)
     }
   }
 
@@ -121,6 +154,17 @@ export function DataManagement({ expenses, onDataImported }: DataManagementProps
           Your data is stored locally in IndexedDB for persistence. Use export/import for backups.
         </p>
       </CardContent>
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={confirmClearData}
+        title="Clear All Data?"
+        description="Are you sure you want to delete all expense data? This action cannot be undone."
+        confirmText="Clear All"
+        type="danger"
+        isLoading={isClearing}
+      />
     </Card>
   )
 }

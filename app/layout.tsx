@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   },
 }
 
+import { ToastProvider } from "@/components/ui/toast"
+
 export default function RootLayout({
   children,
 }: {
@@ -24,7 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   )

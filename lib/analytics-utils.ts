@@ -254,35 +254,22 @@ export function calculateAnalytics(expenses: Expense[]): AnalyticsData {
 }
 
 export function getInsightMessage(analytics: AnalyticsData): string[] {
-  const insights: string[] = []
+  if (analytics.totalSpent === 0) return []
 
-  if (analytics.monthlyComparison.changePercentage > 20) {
-    insights.push(`Your spending increased by ${analytics.monthlyComparison.changePercentage.toFixed(0)}% this month`)
-  } else if (analytics.monthlyComparison.changePercentage < -20) {
-    insights.push(
-      `Great job! You reduced spending by ${Math.abs(analytics.monthlyComparison.changePercentage).toFixed(0)}% this month`,
-    )
-  }
+  const topCategory = analytics.categoryInsights[0]
+  const momentum = analytics.monthlyComparison.changePercentage
+  const momentumText =
+    momentum > 10
+      ? `spending has increased by ${momentum.toFixed(0)}% compared to last month`
+      : momentum < -10
+        ? `excellent progress, spending is down by ${Math.abs(momentum).toFixed(0)}%`
+        : "expenditure remains stable compared to previous periods"
 
-  if (analytics.topCategory) {
-    const topCategoryInsight = analytics.categoryInsights[0]
-    insights.push(
-      `${analytics.topCategory} is your biggest expense category at ${topCategoryInsight.percentage.toFixed(0)}% of total spending`,
-    )
-  }
+  const summary = `Your financial momentum is currently ${momentumText}. ${topCategory.category
+    } represents your primary footprint, accounting for ${topCategory.percentage.toFixed(0)}% of total volume ($${topCategory.amount.toLocaleString()}). ${analytics.averageTransaction > 100
+      ? "Focus on high-value transaction optimization."
+      : "Overall transaction density is within nominal range."
+    }`
 
-  const highSpendingCategories = analytics.categoryInsights.filter((c) => c.percentage > 30)
-  if (highSpendingCategories.length > 0) {
-    insights.push(
-      `Consider reviewing your ${highSpendingCategories[0].category.toLowerCase()} expenses - they make up over 30% of your spending`,
-    )
-  }
-
-  if (analytics.averageTransaction > 100) {
-    insights.push(
-      `Your average transaction is $${analytics.averageTransaction.toFixed(0)} - consider tracking smaller purchases too`,
-    )
-  }
-
-  return insights
+  return [summary]
 }

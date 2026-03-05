@@ -224,211 +224,192 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading, re
   }
 
   return (
-    <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
-      <CardHeader className="pb-4 md:pb-6">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-            <Repeat className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-            <span>Recurring Expenses</span>
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Form */}
-        {showForm && (
-          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg md:text-xl">
-                {editingRecurring ? "Edit Recurring Expense" : "Add Recurring Expense"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="recurring-amount">Amount</Label>
-                    <Input
-                      id="recurring-amount"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="glass-strong bg-card/20 border-border/30"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="recurring-frequency">Frequency</Label>
-                    <Select
-                      value={frequency}
-                      onValueChange={(value: RecurringExpense["frequency"]) => setFrequency(value)}
-                    >
-                      <SelectTrigger className="glass-strong bg-card/20 border-border/30">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="glass-dropdown">
-                        <SelectItem value="daily" className="glass-dropdown-item">
-                          Daily
-                        </SelectItem>
-                        <SelectItem value="weekly" className="glass-dropdown-item">
-                          Weekly
-                        </SelectItem>
-                        <SelectItem value="monthly" className="glass-dropdown-item">
-                          Monthly
-                        </SelectItem>
-                        <SelectItem value="yearly" className="glass-dropdown-item">
-                          Yearly
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="recurring-category">Category</Label>
-                  <Select value={category} onValueChange={setCategory} required>
-                    <SelectTrigger className="glass-strong bg-card/20 border-border/30">
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent className="glass-dropdown">
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat} className="glass-dropdown-item">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(cat) }} />
-                            {cat}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="recurring-description">Description</Label>
-                  <Input
-                    id="recurring-description"
-                    placeholder="e.g., Netflix subscription"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="glass-strong bg-card/20 border-border/30"
-                    required
-                  />
-                </div>
-
-                <div className="flex space-x-3 pt-4">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
-                  >
-                    {editingRecurring ? "Update" : "Add Recurring Expense"}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={resetForm} 
-                    className="flex-1 glass-strong bg-card/20 border-border/30 rounded-xl py-3 md:py-4 h-12 md:h-14 hover:bg-secondary/10 transition-all duration-200 text-base md:text-lg font-semibold"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Recurring Expenses List */}
-        {recurringExpenses.length > 0 ? (
-          <div className="space-y-3">
-            {recurringExpenses.map((recurring) => {
-              const dueStatus = getDueStatus(recurring.nextDue)
-              return (
-                <Card key={recurring.id} className="glass-strong">
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: getCategoryColor(recurring.category) }}
-                          />
-                          <div>
-                            <h4 className="font-medium text-foreground">{recurring.description}</h4>
-                            <p className="text-sm text-muted-foreground">{recurring.category}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-lg">${recurring.amount.toLocaleString()}</div>
-                          <div className="text-xs text-muted-foreground capitalize">{recurring.frequency}</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant={dueStatus.color as "default" | "secondary" | "destructive" | "outline"} className="text-xs">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {dueStatus.text}
-                          </Badge>
-                          <div className="flex items-center space-x-2">
-                            <Switch
-                              checked={recurring.isActive}
-                              onCheckedChange={() => handleToggleActive(recurring)}
-                            />
-                            <span className="text-xs text-muted-foreground">
-                              {recurring.isActive ? "Active" : "Paused"}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {recurring.isActive && (dueStatus.status === "overdue" || dueStatus.status === "due") && (
-                            <Button
-                              onClick={() => handleExecuteRecurring(recurring)}
-                              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation text-sm font-semibold"
-                            >
-                              Add Now
-                            </Button>
-                          )}
-                          <Button 
-                            onClick={() => handleEdit(recurring)} 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-8 w-8 p-0 rounded-full hover:bg-secondary/20 transition-all duration-200"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDelete(recurring.id)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 rounded-full text-destructive hover:text-destructive hover:bg-destructive/20 transition-all duration-200"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <div className="p-4 rounded-full bg-muted/20 w-fit mx-auto mb-4">
-              <Repeat className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">No recurring expenses</h3>
-            <p className="text-muted-foreground mb-4">Set up recurring expenses like subscriptions and bills</p>
-            <Button 
-              onClick={() => setShowForm(true)} 
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 md:px-8 py-3 md:py-4 rounded-xl w-full sm:w-auto h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 touch-manipulation"
+    <div className="space-y-6">
+      {/* Header Card */}
+      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center space-x-3 text-xl font-bold">
+              <Repeat className="h-6 w-6 text-secondary" />
+              <span>Subscription Management</span>
+            </CardTitle>
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              variant={showForm ? "ghost" : "outline"}
+              size="sm"
+              className={`rounded-full px-4 h-9 transition-all duration-300 ${showForm
+                  ? "text-muted-foreground hover:bg-card/20"
+                  : "bg-secondary/10 border-secondary/30 text-secondary hover:bg-secondary/20"
+                }`}
             >
-              <Plus className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-              Add Your First Recurring Expense
+              {showForm ? "Close Form" : <><Plus className="h-4 w-4 mr-2" /> New Template</>}
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground">Manage your recurring bills, subscriptions, and automated entries.</p>
+        </CardHeader>
+
+        {showForm && (
+          <CardContent className="pb-8">
+            <Card className="glass-strong bg-secondary/5 border-secondary/20 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="p-1 bg-secondary/10 border-b border-secondary/10">
+                <span className="text-[10px] uppercase tracking-widest font-bold px-3 py-1 block">Template Creator</span>
+              </div>
+              <CardContent className="p-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Description</Label>
+                      <Input
+                        placeholder="e.g. Netflix"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="glass-strong bg-card/10 border-border/20 h-11"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Amount</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="glass-strong bg-card/10 border-border/20 h-11"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Frequency</Label>
+                      <Select value={frequency} onValueChange={(v: any) => setFrequency(v)}>
+                        <SelectTrigger className="glass-strong bg-card/10 border-border/20 h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="glass-dropdown">
+                          {["daily", "weekly", "monthly", "yearly"].map(f => (
+                            <SelectItem key={f} value={f} className="capitalize glass-dropdown-item">{f}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Category</Label>
+                      <Select value={category} onValueChange={setCategory} required>
+                        <SelectTrigger className="glass-strong bg-card/10 border-border/20 h-11">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent className="glass-dropdown">
+                          {categories.map(cat => (
+                            <SelectItem key={cat} value={cat} className="glass-dropdown-item">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getCategoryColor(cat) }} />
+                                {cat}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-2">
+                    <Button type="button" variant="ghost" onClick={resetForm} className="h-10 px-6">Cancel</Button>
+                    <Button type="submit" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground h-10 px-8 rounded-lg shadow-lg shadow-secondary/20">
+                      {editingRecurring ? "Save Changes" : "Create Template"}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </CardContent>
         )}
-      </CardContent>
-    </Card>
+      </Card>
+
+      {/* Bento Grid of Recurring Items */}
+      {recurringExpenses.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recurringExpenses.map((expense) => {
+            const dueStatus = getDueStatus(expense.nextDue)
+            return (
+              <Card key={expense.id} className="relative glass-strong bg-card/20 border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                {/* Visual Accent */}
+                <div
+                  className="absolute top-0 left-0 w-full h-1 opacity-50 transition-opacity group-hover:opacity-100"
+                  style={{ backgroundColor: getCategoryColor(expense.category) }}
+                />
+
+                <CardContent className="p-5 flex flex-col h-full">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="p-2 rounded-xl bg-card/20 border border-border/10 backdrop-blur-md">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(expense.category) }} />
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button onClick={() => handleEdit(expense)} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-secondary/20"><Edit className="h-3 w-3" /></Button>
+                      <Button onClick={() => handleDelete(expense.id)} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-destructive/20 text-destructive"><Trash2 className="h-3 w-3" /></Button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1">
+                    <h4 className="text-lg font-bold text-foreground mb-1 line-clamp-1">{expense.description}</h4>
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-4">{expense.category}</span>
+
+                    <div className="flex items-baseline gap-1 mb-1">
+                      <span className="text-2xl font-black text-foreground">${expense.amount.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground font-medium">/ {expense.frequency}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] border-none font-bold uppercase transition-colors ${dueStatus.status === 'overdue' ? 'bg-destructive/20 text-destructive' :
+                            dueStatus.status === 'due' ? 'bg-secondary/20 text-secondary' : 'bg-card/30 text-muted-foreground'
+                          }`}
+                      >
+                        <Clock className="h-3 w-3 mr-1" /> {dueStatus.text}
+                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold uppercase ${expense.isActive ? 'text-green-500' : 'text-muted-foreground'}`}>
+                          {expense.isActive ? 'Active' : 'Paused'}
+                        </span>
+                        <Switch
+                          checked={expense.isActive}
+                          onCheckedChange={() => handleToggleActive(expense)}
+                          className="scale-75 data-[state=checked]:bg-secondary"
+                        />
+                      </div>
+                    </div>
+
+                    {expense.isActive && (dueStatus.status === "overdue" || dueStatus.status === "due") && (
+                      <Button
+                        onClick={() => handleExecuteRecurring(expense)}
+                        className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground text-xs font-bold h-9 rounded-lg"
+                      >
+                        Post Expense Now
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      ) : (
+        <Card className="glass-strong bg-card/10 border-border/20 h-64 border-dashed">
+          <CardContent className="flex flex-col items-center justify-center h-full text-center space-y-4">
+            <div className="p-4 rounded-full bg-muted/10 border border-muted/20">
+              <Repeat className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Clean Slate</h3>
+              <p className="text-sm text-muted-foreground max-w-[200px]">You haven't automated any expenses yet.</p>
+            </div>
+            <Button onClick={() => setShowForm(true)} variant="outline" className="h-10 rounded-full border-secondary/30 text-secondary hover:bg-secondary/10">
+              Add Your First Recurring Bill
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }

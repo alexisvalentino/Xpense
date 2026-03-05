@@ -91,9 +91,10 @@ export function generateImportableRecurringCSV(recurring: RecurringExpense[]): s
 }
 
 export function generateImportableQuickAddCSV(quickAdd: QuickAddOption[]): string {
-  const headers = ["id", "label", "amount", "category", "description", "order", "createdAt"]
+  const headers = ["id", "icon", "label", "amount", "category", "description", "order", "createdAt"]
   const rows = quickAdd.map((option) => [
     option.id,
+    option.icon,
     `"${option.label.replace(/"/g, '""')}"`,
     option.amount.toString(),
     option.category,
@@ -112,10 +113,10 @@ export function parseCSV(csvContent: string): string[][] {
     const result = []
     let current = ''
     let inQuotes = false
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i]
-      
+
       if (char === '"') {
         if (inQuotes && line[i + 1] === '"') {
           current += '"'
@@ -130,7 +131,7 @@ export function parseCSV(csvContent: string): string[][] {
         current += char
       }
     }
-    
+
     result.push(current)
     return result
   })
@@ -139,16 +140,16 @@ export function parseCSV(csvContent: string): string[][] {
 export function parseExpensesFromCSV(csvContent: string): Expense[] {
   const rows = parseCSV(csvContent)
   if (rows.length < 2) return []
-  
+
   const headers = rows[0]
   const dataRows = rows.slice(1)
-  
+
   return dataRows.map(row => {
     const expense: any = {}
     headers.forEach((header, index) => {
       expense[header] = row[index]
     })
-    
+
     return {
       id: expense.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
       date: expense.date,
@@ -163,16 +164,16 @@ export function parseExpensesFromCSV(csvContent: string): Expense[] {
 export function parseBudgetsFromCSV(csvContent: string): Budget[] {
   const rows = parseCSV(csvContent)
   if (rows.length < 2) return []
-  
+
   const headers = rows[0]
   const dataRows = rows.slice(1)
-  
+
   return dataRows.map(row => {
     const budget: any = {}
     headers.forEach((header, index) => {
       budget[header] = row[index]
     })
-    
+
     return {
       id: budget.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
       category: budget.category,
@@ -186,16 +187,16 @@ export function parseBudgetsFromCSV(csvContent: string): Budget[] {
 export function parseRecurringFromCSV(csvContent: string): RecurringExpense[] {
   const rows = parseCSV(csvContent)
   if (rows.length < 2) return []
-  
+
   const headers = rows[0]
   const dataRows = rows.slice(1)
-  
+
   return dataRows.map(row => {
     const recurring: any = {}
     headers.forEach((header, index) => {
       recurring[header] = row[index]
     })
-    
+
     return {
       id: recurring.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
       description: recurring.description,
@@ -212,18 +213,19 @@ export function parseRecurringFromCSV(csvContent: string): RecurringExpense[] {
 export function parseQuickAddFromCSV(csvContent: string): QuickAddOption[] {
   const rows = parseCSV(csvContent)
   if (rows.length < 2) return []
-  
+
   const headers = rows[0]
   const dataRows = rows.slice(1)
-  
+
   return dataRows.map(row => {
     const quickAdd: any = {}
     headers.forEach((header, index) => {
       quickAdd[header] = row[index]
     })
-    
+
     return {
       id: quickAdd.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      icon: quickAdd.icon || "ShoppingBag",
       label: quickAdd.label,
       amount: parseFloat(quickAdd.amount) || 0,
       category: quickAdd.category,
@@ -394,16 +396,16 @@ export function generateReportHTML(data: ReportData): string {
         </div>
         <div class="section-content">
             ${Object.entries(categoryTotals)
-              .sort(([, a], [, b]) => b - a)
-              .map(
-                ([category, amount]) => `
+      .sort(([, a], [, b]) => b - a)
+      .map(
+        ([category, amount]) => `
                 <div class="category-bar">
                     <span class="category-name">${category}</span>
                     <span class="category-amount">$${amount.toLocaleString()}</span>
                 </div>
             `,
-              )
-              .join("")}
+      )
+      .join("")}
         </div>
     </div>
 
@@ -423,9 +425,9 @@ export function generateReportHTML(data: ReportData): string {
                 </thead>
                 <tbody>
                     ${expenses
-                      .slice(0, 20)
-                      .map(
-                        (expense) => `
+      .slice(0, 20)
+      .map(
+        (expense) => `
                         <tr>
                             <td>${new Date(expense.date).toLocaleDateString()}</td>
                             <td>${expense.description}</td>
@@ -433,16 +435,15 @@ export function generateReportHTML(data: ReportData): string {
                             <td class="amount">$${expense.amount.toLocaleString()}</td>
                         </tr>
                     `,
-                      )
-                      .join("")}
+      )
+      .join("")}
                 </tbody>
             </table>
         </div>
     </div>
 
-    ${
-      budgets.length > 0
-        ? `
+    ${budgets.length > 0
+      ? `
     <div class="section">
         <div class="section-header">
             <h2>Budget Overview</h2>
@@ -458,22 +459,22 @@ export function generateReportHTML(data: ReportData): string {
                 </thead>
                 <tbody>
                     ${budgets
-                      .map(
-                        (budget) => `
+        .map(
+          (budget) => `
                         <tr>
                             <td>${budget.category}</td>
                             <td class="amount">$${budget.limit.toLocaleString()}</td>
                             <td>${budget.period}</td>
                         </tr>
                     `,
-                      )
-                      .join("")}
+        )
+        .join("")}
                 </tbody>
             </table>
         </div>
     </div>
     `
-        : ""
+      : ""
     }
 
     <div class="footer">
@@ -515,7 +516,7 @@ export function getDateRangePresets() {
   return {
     "this-week": {
       label: "This Week",
-      from: new Date(today.setDate(today.getDate() - today.getDay())).toISOString().split("T")[0],
+      from: new Date(new Date(today).setDate(today.getDate() - today.getDay())).toISOString().split("T")[0],
       to: new Date().toISOString().split("T")[0],
     },
     "this-month": {

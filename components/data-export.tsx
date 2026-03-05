@@ -31,6 +31,8 @@ import {
   type ReportData,
 } from "@/lib/export-utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/toast"
+import { ConfirmationModal } from "@/components/ui/confirmation-modal"
 
 interface DataExportProps {
   expenses: Expense[]
@@ -42,6 +44,9 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [isExporting, setIsExporting] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const datePresets = getDateRangePresets()
 
@@ -63,7 +68,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
     setDateTo(presetData.to)
   }
 
-  const handleExportCSV = async (type: "expenses" | "budgets" | "recurring" | "all") => {
+  const handleExportCSV = async (type: "expenses" | "budgets" | "recurring" | "quickadd" | "all") => {
     setIsExporting(true)
     try {
       const timestamp = new Date().toISOString().split("T")[0]
@@ -85,6 +90,12 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           downloadFile(recurringCSV, `recurring-expenses-importable-${timestamp}.csv`, "text/csv")
           break
 
+        case "quickadd":
+          const quickAddData = await expenseDB.getAllQuickAddOptions()
+          const quickAddCSV = generateImportableQuickAddCSV(quickAddData)
+          downloadFile(quickAddCSV, `quickadd-importable-${timestamp}.csv`, "text/csv")
+          break
+
         case "all":
           const allData = {
             expenses: getFilteredExpenses(),
@@ -96,8 +107,19 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           downloadFile(jsonContent, `expense-data-${timestamp}.json`, "application/json")
           break
       }
+
+      toast({
+        message: "Export successful",
+        description: `Your ${type === 'all' ? 'data backup' : type} has been downloaded.`,
+        type: "success",
+      })
     } catch (error) {
       console.error("Export failed:", error)
+      toast({
+        message: "Export failed",
+        description: "There was an error generating your file.",
+        type: "error",
+      })
     } finally {
       setIsExporting(false)
     }
@@ -130,8 +152,18 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
       } else {
         printReport(htmlContent)
       }
+
+      toast({
+        message: action === "download" ? "Report downloaded" : "Printing report...",
+        type: "success",
+      })
     } catch (error) {
       console.error("Report generation failed:", error)
+      toast({
+        message: "Report failed",
+        description: "Failed to generate report.",
+        type: "error",
+      })
     } finally {
       setIsExporting(false)
     }
@@ -143,6 +175,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
     setIsExporting(true)
     try {
+      setSelectedFileName(file.name)
       const content = await file.text()
       let importedCount = 0
 
@@ -204,7 +237,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
       } else {
         // Handle CSV files
         const fileName = file.name.toLowerCase()
-        
+
         if (fileName.includes('expenses') || fileName.includes('expense')) {
           const expenses = parseExpensesFromCSV(content)
           for (const expense of expenses) {
@@ -251,300 +284,262 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
       }
 
       // Show success message
-      alert(`Successfully imported ${importedCount} items! The page will refresh to show your data.`)
-      
-      // Refresh the page to show imported data
-      window.location.reload()
+      toast({
+        message: "Import successful",
+        description: `Successfully imported ${importedCount} items! Refreshing to update dashboard...`,
+        type: "success",
+      })
+
+      // Refresh the page after a short delay to allow toast to be seen
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
     } catch (error) {
       console.error("Import failed:", error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      alert(`Failed to import data: ${errorMessage}. Please check the file format and try again.`)
+
+      toast({
+        message: "Import failed",
+        description: errorMessage,
+        type: "error",
+      })
     } finally {
       setIsExporting(false)
-      // Reset file input
+      // Reset file input and state
       event.target.value = ""
+      setSelectedFileName(null)
     }
   }
 
   const handleClearAllData = async () => {
-    if (!confirm("⚠️ WARNING: This will permanently delete ALL your data including expenses, budgets, recurring expenses, and quick add options. This action cannot be undone. Are you sure you want to continue?")) {
-      return
-    }
+    setIsConfirmOpen(true)
+  }
 
-    if (!confirm("Are you absolutely sure? This will delete everything and cannot be recovered.")) {
-      return
-    }
-
+  const confirmClearAll = async () => {
     setIsExporting(true)
     try {
       await expenseDB.clearAllData()
-      alert("All data has been cleared. The page will refresh.")
-      window.location.reload()
+      toast({
+        message: "All data cleared",
+        description: "Your dashboard has been reset. Refreshing...",
+        type: "info",
+      })
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
     } catch (error) {
       console.error("Failed to clear data:", error)
-      alert("Failed to clear data. Please try again.")
+      toast({
+        message: "Error",
+        description: "Failed to clear data records.",
+        type: "error",
+      })
     } finally {
       setIsExporting(false)
+      setIsConfirmOpen(false)
     }
   }
 
   return (
     <div className="space-y-6">
-      {/* Main Export Card */}
       <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
-        <CardHeader className="pb-4 md:pb-6">
-          <CardTitle className="flex items-center space-x-3 text-xl md:text-2xl font-bold">
-            <Download className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
-            <span>Data Export & Import</span>
-        </CardTitle>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Export your data in various formats or import data from other sources
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center space-x-3 text-xl font-bold">
+            <Download className="h-6 w-6 text-secondary" />
+            <span>Reports & Data</span>
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Generate detailed reports or manage your data backups
           </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-          {/* Date Range Selection - Much Better Design */}
-          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-3 text-lg font-semibold">
-                <Calendar className="h-5 w-5 text-secondary" />
-                <span>Export Date Range</span>
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Choose a specific date range or use a quick preset for your export
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Quick Presets - Clean Dropdown */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-foreground">Quick Presets</Label>
-                <Select onValueChange={handlePresetSelect}>
-                  <SelectTrigger className="glass-strong bg-card/20 border-border/30 h-12">
-                    <SelectValue placeholder="Select a preset date range" />
-                  </SelectTrigger>
-                  <SelectContent className="glass-dropdown">
-                    {Object.entries(datePresets).map(([key, preset]) => (
-                      <SelectItem key={key} value={key} className="glass-dropdown-item">
-                        <div className="flex items-center justify-between w-full">
-                          <span>{key.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            {preset.from} - {preset.to}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Custom Date Range - Clean and Simple */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-foreground">Custom Date Range</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date-from" className="text-xs text-muted-foreground">From Date</Label>
-                    <Input
-                      id="date-from"
-                      type="date"
-                      value={dateFrom}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                      className="glass-strong bg-card/20 border-border/30 h-12 text-foreground placeholder:text-muted-foreground focus:border-secondary/50 focus:ring-secondary/20 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="date-to" className="text-xs text-muted-foreground">To Date</Label>
-                    <Input
-                      id="date-to"
-                      type="date"
-                      value={dateTo}
-                      onChange={(e) => setDateTo(e.target.value)}
-                      className="glass-strong bg-card/20 border-border/30 h-12 text-foreground placeholder:text-muted-foreground focus:border-secondary/50 focus:ring-secondary/20 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Current Selection Summary */}
-              {(dateFrom || dateTo) && (
-                <div className="flex items-center space-x-2 text-sm p-2 glass-strong bg-secondary/10 rounded-lg border border-secondary/30">
+        </CardHeader>
+        <CardContent className="space-y-8">
+          {/* Top Section: Date Selection & Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-secondary" />
-                  <span className="text-muted-foreground">Period:</span>
-                  <span className="font-medium text-foreground">
-                    {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} - {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
-                  </span>
+                  Visual Report Period
+                </Label>
+                <div className="flex gap-2">
+                  {Object.entries(datePresets).slice(0, 3).map(([key, preset]) => (
+                    <Button
+                      key={key}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePresetSelect(key)}
+                      className="text-[10px] uppercase tracking-wider h-6 px-2 hover:bg-secondary/10 hover:text-secondary"
+                    >
+                      {key.split('-').map(w => w[0]).join('')}
+                    </Button>
+                  ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
 
-          {/* Export Options - Bento Grid */}
-        <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-1 h-6 bg-secondary rounded-full"></div>
-              <h3 className="text-lg font-semibold text-foreground">Export Options</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("expenses")}>
-                <CardContent className="p-4 text-center space-y-3">
-                  <FileText className="h-6 w-6 text-secondary mx-auto" />
-          <div>
-                    <h4 className="font-semibold text-foreground text-sm">Expenses CSV</h4>
-                    <p className="text-xs text-muted-foreground">Download all expenses</p>
-          </div>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("budgets")}>
-                <CardContent className="p-4 text-center space-y-3">
-                  <Target className="h-6 w-6 text-secondary mx-auto" />
-                  <div>
-                    <h4 className="font-semibold text-foreground text-sm">Budgets CSV</h4>
-                    <p className="text-xs text-muted-foreground">Export budget settings</p>
-        </div>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("recurring")}>
-                <CardContent className="p-4 text-center space-y-3">
-                  <Repeat className="h-6 w-6 text-secondary mx-auto" />
-                  <div>
-                    <h4 className="font-semibold text-foreground text-sm">Recurring CSV</h4>
-                    <p className="text-xs text-muted-foreground">Export templates</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleExportCSV("all")}>
-                <CardContent className="p-4 text-center space-y-3">
-                  <Database className="h-6 w-6 text-secondary mx-auto" />
-          <div>
-                    <h4 className="font-semibold text-foreground text-sm">All Data JSON</h4>
-                    <p className="text-xs text-muted-foreground">Complete backup</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Report Generation - Bento Style */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleGenerateReport("download")}>
-              <CardContent className="p-6 text-center space-y-4">
-                <FileText className="h-8 w-8 text-secondary mx-auto" />
-                <div>
-                  <h4 className="font-semibold text-foreground text-lg">Download HTML Report</h4>
-                  <p className="text-sm text-muted-foreground">Generate and download detailed report</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg hover:shadow-xl transition-all duration-200 cursor-pointer group" onClick={() => handleGenerateReport("print")}>
-              <CardContent className="p-6 text-center space-y-4">
-                <Printer className="h-8 w-8 text-secondary mx-auto" />
-                <div>
-                  <h4 className="font-semibold text-foreground text-lg">Print Report</h4>
-                  <p className="text-sm text-muted-foreground">Print directly or save as PDF</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Import Section - Bento Style */}
-          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center space-x-2 text-base font-semibold">
-                <div className="w-1 h-4 bg-secondary rounded-full"></div>
-                <span>Import Data</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Upload className="h-6 w-6 text-secondary" />
-                     <div>
-                  <h4 className="font-semibold text-foreground">Import from JSON file</h4>
-                  <p className="text-sm text-muted-foreground">Restore your data from a backup</p>
-                </div>
-           </div>
-              <p className="text-sm text-muted-foreground">
-                Import expenses, budgets, recurring expenses, and quick add options from a previously exported JSON file.
-              </p>
-              <div className="flex items-center space-x-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportData}
-                  className="glass-strong bg-card/20 border-border/30 flex-1 h-11 text-foreground placeholder:text-muted-foreground focus:border-secondary/50 focus:ring-secondary/20"
-                  placeholder="Choose a JSON file to import..."
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="glass-strong bg-card/10 border-border/20 h-11 text-xs"
                 />
-             <Button 
-               variant="outline" 
-                  onClick={() => document.getElementById("import-file")?.click()}
-                  className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 hover:bg-secondary/10 text-foreground hover:text-secondary px-6 h-11 transition-all duration-200"
-             >
-                  Browse
-             </Button>
-           </div>
-            </CardContent>
-          </Card>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="glass-strong bg-card/10 border-border/20 h-11 text-xs"
+                />
+              </div>
+            </div>
 
-          {/* Data Management - Bento Style */}
-          <Card className="glass-strong bg-card/20 border-border/30 shadow-lg backdrop-blur-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center space-x-2 text-base font-semibold">
-                <div className="w-1 h-4 bg-secondary rounded-full"></div>
-                <span>Data Management</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Manage your data storage and perform maintenance operations.
-              </p>
-          <div className="flex items-center space-x-4">
-            <Button 
-              onClick={handleClearAllData}
-              disabled={isExporting}
-              variant="outline" 
-                  className="glass-strong bg-card/20 border-destructive/30 hover:border-destructive/50 hover:bg-destructive/10 text-destructive hover:text-destructive px-6 py-3 transition-all duration-200"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear All Data
-            </Button>
-          </div>
-            </CardContent>
-          </Card>
-
-          {/* Export Summary - Enhanced */}
-        {(dateFrom || dateTo) && (
-            <Card className="glass-strong bg-secondary/10 border-secondary/30 shadow-lg backdrop-blur-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center space-x-2 text-base font-semibold">
-                  <FileText className="h-4 w-4 text-secondary" />
-                  <span>Export Summary</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="p-3 glass-strong bg-card/20 rounded-lg border border-border/30">
-                    <span className="text-muted-foreground block mb-1">Selected Period</span>
-                    <p className="font-semibold text-foreground">
-                      {dateFrom ? new Date(dateFrom).toLocaleDateString() : "Beginning"} - {dateTo ? new Date(dateTo).toLocaleDateString() : "Today"}
-                    </p>
-                  </div>
-                  <div className="p-3 glass-strong bg-card/20 rounded-lg border border-border/30">
-                    <span className="text-muted-foreground block mb-1">Expenses in Period</span>
-                    <p className="font-semibold text-foreground">{getFilteredExpenses().length} transactions</p>
-                  </div>
-                  <div className="p-3 glass-strong bg-card/20 rounded-lg border border-border/30">
-                    <span className="text-muted-foreground block mb-1">Total Amount</span>
-                    <p className="font-semibold text-foreground">
-                      ${getFilteredExpenses().reduce((sum, expense) => sum + expense.amount, 0).toLocaleString()}
-              </p>
+            <div className="glass-strong bg-secondary/5 border border-secondary/20 rounded-xl p-4 flex flex-col justify-center">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Scope Summary</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-foreground">${getFilteredExpenses().reduce((sum, e) => sum + e.amount, 0).toLocaleString()}</span>
+                <span className="text-xs text-muted-foreground">in {getFilteredExpenses().length} items</span>
+              </div>
             </div>
           </div>
+
+          <Separator className="bg-border/20" />
+
+          {/* Primary Actions: The Bento Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* BIG CARD: Intelligence Report */}
+            <Card className="lg:col-span-1 glass-strong bg-secondary/10 border-secondary/20 shadow-lg hover:shadow-secondary/5 transition-all duration-300 overflow-hidden group">
+              <CardContent className="p-5 md:p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="h-10 w-10 rounded-lg bg-secondary/20 flex items-center justify-center mb-3">
+                    <FileText className="h-5 w-5 text-secondary" />
+                  </div>
+                  <h4 className="text-base md:text-lg font-bold text-foreground">Visual Intelligence</h4>
+                  <p className="text-[11px] md:text-xs text-muted-foreground leading-relaxed">Full analytics report with charts and categorized spending breakdowns.</p>
+                </div>
+                <div className="mt-auto flex gap-2">
+                  <Button
+                    onClick={() => handleGenerateReport("download")}
+                    className="flex-1 bg-secondary hover:bg-secondary/90 text-secondary-foreground text-xs h-10 font-bold"
+                  >
+                    <Download className="mr-2 h-3.5 w-3.5" /> Report
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleGenerateReport("print")}
+                    className="aspect-square p-0 border-secondary/30 text-secondary hover:bg-secondary/10 h-10 w-10 shrink-0"
+                  >
+                    <Printer className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-        )}
-      </CardContent>
-    </Card>
-    </div>
+
+            {/* CARD: Spreadsheet */}
+            <Card className="glass-strong bg-card/10 border-border/20 hover:border-secondary/30 transition-all cursor-pointer group" onClick={() => handleExportCSV("expenses")}>
+              <CardContent className="p-5 md:p-6 flex flex-row sm:flex-col justify-between items-center sm:items-start h-full gap-4">
+                <div className="flex items-center sm:block gap-4">
+                  <FileSpreadsheet className="h-6 w-6 text-muted-foreground group-hover:text-secondary sm:mb-3 transition-colors shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-sm">Spreadsheet Export</h4>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1 sm:line-clamp-none">Download as CSV for Excel/Sheets.</p>
+                  </div>
+                </div>
+                <div className="sm:mt-4 flex items-center text-[10px] font-black uppercase text-secondary sm:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Download <Download className="ml-1 h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CARD: Full Backup */}
+            <Card className="glass-strong bg-card/10 border-border/20 hover:border-secondary/30 transition-all cursor-pointer group" onClick={() => handleExportCSV("all")}>
+              <CardContent className="p-5 md:p-6 flex flex-row sm:flex-col justify-between items-center sm:items-start h-full gap-4">
+                <div className="flex items-center sm:block gap-4">
+                  <Database className="h-6 w-6 text-muted-foreground group-hover:text-secondary sm:mb-3 transition-colors shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-sm">Database Backup</h4>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1 sm:line-clamp-none">Snapshot of all expenses and settings.</p>
+                  </div>
+                </div>
+                <div className="sm:mt-4 flex items-center text-[10px] font-black uppercase text-secondary sm:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Generate <Database className="ml-1 h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Bottom Row: Minimal Maintenance */}
+          <div className="pt-4 border-t border-border/10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4 flex-1 w-full max-w-xl">
+                <div className="p-2 rounded-full bg-card/20 border border-border/10">
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold">Restore from Backup</span>
+                    {selectedFileName && <span className="text-[10px] text-secondary animate-pulse">{selectedFileName}</span>}
+                  </div>
+                  <div className="relative group">
+                    <Input
+                      id="import-file"
+                      type="file"
+                      accept=".json,.csv"
+                      onChange={handleImportData}
+                      className="hidden"
+                    />
+                    <div
+                      onClick={() => document.getElementById('import-file')?.click()}
+                      className="h-10 rounded-lg border border-dashed border-border/30 bg-card/5 hover:bg-card/10 hover:border-secondary/50 transition-all flex items-center justify-center cursor-pointer text-[11px] text-muted-foreground"
+                    >
+                      Drop file here or <span className="text-secondary font-bold mx-1">Browse</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Danger Zone</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAllData}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 text-[11px] h-8"
+                >
+                  <Trash2 className="h-3 w-3 mr-2" /> Reset Dashboard
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary (Conditional) */}
+          {(dateFrom || dateTo) && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[10px] text-muted-foreground px-4 py-2 glass-strong bg-secondary/5 rounded-lg border border-secondary/10">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-3 w-3" />
+                <span>{dateFrom || 'Start'} to {dateTo || 'Today'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-3 w-3" />
+                <span>{getFilteredExpenses().length} Transactions</span>
+              </div>
+              <div className="flex items-center gap-2 justify-end">
+                <span className="font-bold text-secondary">${getFilteredExpenses().reduce((sum, e) => sum + e.amount, 0).toLocaleString()}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={confirmClearAll}
+        title="Clear All Data?"
+        description="This will permanently delete all expenses, budgets, and recurring settings. This action cannot be undone."
+        confirmText="Clear Everything"
+        type="danger"
+        isLoading={isExporting}
+      />
+    </div >
   )
 }

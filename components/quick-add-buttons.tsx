@@ -79,21 +79,21 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
   }
 
   return (
-    <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
-      <CardHeader className="pb-3 md:pb-4">
-        <CardTitle className="flex items-center justify-between text-base md:text-lg font-semibold">
-          <div className="flex items-center space-x-2">
-            <Plus className="h-4 w-4 md:h-5 md:w-5 text-secondary" />
-            <span>Quick Add</span>
+    <Card className="glass-strong bg-card/20 md:bg-card/20 border-border/10 md:border-border/30 shadow-none md:shadow-xl backdrop-blur-xl border-none md:border-solid">
+      <CardHeader className="pb-2 md:pb-4 px-0 md:px-6">
+        <CardTitle className="flex items-center justify-between text-sm md:text-lg font-bold uppercase tracking-wider md:tracking-normal">
+          <div className="flex items-center space-x-2 opacity-60 md:opacity-100">
+            <Plus className="h-4 w-4 text-secondary md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-base">Quick Actions</span>
           </div>
           <QuickAddEditModal onOptionsChange={handleOptionsChange} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 md:p-4">
+      <CardContent className="p-0 md:p-4">
         {options.length === 0 ? (
           <div className="text-center py-8">
             <div className="space-y-4">
-              <Button 
+              <Button
                 onClick={() => {
                   // Trigger the edit modal to open
                   const settingsButton = document.querySelector('[data-settings-trigger]') as HTMLButtonElement
@@ -117,7 +117,7 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
           <>
             {/* Mobile: Horizontal scrollable list */}
             <div className="md:hidden">
-              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 snap-x">
                 {options.slice(0, 5).map((option) => {
                   const IconComponent = getIconComponent(option.icon)
                   return (
@@ -125,42 +125,72 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
                       key={option.id}
                       onClick={() => handleQuickAdd(option)}
                       variant="outline"
-                      className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex flex-col items-center space-y-2 h-auto py-4 px-4 min-w-[90px] hover:bg-secondary/10 flex-shrink-0 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl backdrop-blur-lg"
+                      className="glass-strong bg-card/10 border-border/20 hover:border-secondary/40 flex items-center space-x-2 h-8 py-0 px-2.5 min-w-[85px] hover:bg-secondary/10 flex-shrink-0 rounded-full transition-all duration-200 active:scale-95 shadow-sm backdrop-blur-md snap-center"
                     >
-                      <div className="h-5 w-5 text-secondary">
-                        <IconComponent className="h-5 w-5" />
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm font-semibold text-foreground">{option.label}</div>
-                        <div className="text-xs text-muted-foreground">${option.amount}</div>
+                      <IconComponent className="h-3 w-3 text-secondary shrink-0" />
+                      <div className="text-left min-w-0 flex-1 flex items-baseline gap-1">
+                        <span className="text-[9px] font-bold text-foreground truncate">{option.label}</span>
+                        <span className="text-[8px] font-black text-secondary/70 shrink-0">${option.amount}</span>
                       </div>
                     </Button>
                   )
                 })}
+                {/* Add New Button for Mobile - if not full */}
+                {options.length < 5 && (
+                  <Button
+                    onClick={() => {
+                      const settingsButton = document.querySelector('[data-settings-trigger]') as HTMLButtonElement
+                      if (settingsButton) settingsButton.click()
+                    }}
+                    variant="outline"
+                    className="glass-strong bg-card/5 border-dashed border-border/30 hover:border-secondary/40 flex items-center space-x-2 h-8 py-0 px-2.5 min-w-[70px] hover:bg-secondary/5 flex-shrink-0 rounded-full transition-all duration-200 active:scale-95 border snap-center"
+                  >
+                    <Plus className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+                    <span className="text-[9px] font-bold text-muted-foreground truncate">New</span>
+                  </Button>
+                )}
               </div>
             </div>
 
             {/* Desktop: Grid layout */}
-            <div className="hidden md:grid md:grid-cols-5 gap-4">
-              {options.slice(0, 5).map((option) => {
+            <div className="hidden md:grid md:grid-cols-6 gap-3">
+              {options.slice(0, 6).map((option) => {
                 const IconComponent = getIconComponent(option.icon)
                 return (
                   <Button
                     key={option.id}
                     onClick={() => handleQuickAdd(option)}
                     variant="outline"
-                    className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex flex-col items-center space-y-3 h-auto py-6 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl shadow-lg hover:shadow-xl backdrop-blur-lg"
+                    className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex flex-col items-center space-y-1.5 h-auto py-3 px-1 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl shadow-lg backdrop-blur-lg"
                   >
-                    <div className="h-6 w-6 text-secondary">
-                      <IconComponent className="h-6 w-6" />
+                    <div className="h-4 w-4 text-secondary">
+                      <IconComponent className="h-4 w-4" />
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-foreground">{option.label}</div>
-                      <div className="text-xs text-muted-foreground">${option.amount}</div>
+                      <div className="text-[10px] font-bold text-foreground leading-tight truncate w-full px-1">{option.label}</div>
+                      <div className="text-[10px] text-muted-foreground/70">${option.amount}</div>
                     </div>
                   </Button>
                 )
               })}
+              {/* Add New Button for Desktop - if not full */}
+              {options.length < 6 && (
+                <Button
+                  onClick={() => {
+                    const settingsButton = document.querySelector('[data-settings-trigger]') as HTMLButtonElement
+                    if (settingsButton) settingsButton.click()
+                  }}
+                  variant="outline"
+                  className="glass-strong bg-card/10 border-dashed border-border/40 hover:border-secondary/50 flex flex-col items-center justify-center space-y-1 h-auto py-3 px-1 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl border-2"
+                >
+                  <div className="h-4 w-4 text-secondary/60">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] font-bold text-muted-foreground">Add More</div>
+                  </div>
+                </Button>
+              )}
             </div>
           </>
         )}
