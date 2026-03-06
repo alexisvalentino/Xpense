@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle, SheetDescription } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 import {
   Menu,
@@ -59,53 +60,48 @@ export function ResponsiveNavigation({ activeTab, onTabChange }: NavigationProps
 
   // Desktop Sidebar Navigation
   const DesktopNavigation = () => (
-    <div className="hidden md:block fixed left-0 top-0 h-full w-64 glass-sidebar border-r border-border/20 z-40">
-      <div className="p-6">
-        {/* Logo and Brand */}
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="p-2 rounded-lg bg-black/20 backdrop-blur-sm">
-            <img src="/x-logo.svg" alt="Xpense Logo" className="h-7 w-7" />
+    <div className="hidden md:block fixed left-0 top-0 h-full w-[240px] bg-background/50 border-r border-border/10 z-40">
+      <div className="flex flex-col h-full py-8 px-4">
+        <div className="flex items-center gap-3 px-3 mb-10">
+          <div className="p-1.5 rounded-xl bg-primary/5 border border-white/10 shadow-sm">
+            <img src="/x-logo.svg" alt="Xpense Logo" className="h-6 w-6" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Xpense</h1>
-            <p className="text-sm text-muted-foreground">Smart Finance</p>
-          </div>
+          <h1 className="text-lg font-extrabold tracking-[0.2em] text-foreground uppercase pt-0.5">Xpense</h1>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="space-y-3">
+        <nav className="flex-1 space-y-1">
           {navigationItems.map(({ id, label, icon: Icon }) => (
             <Button
               key={id}
               onClick={() => onTabChange(id as typeof activeTab)}
-              variant={activeTab === id ? "default" : "ghost"}
-              className={`w-full justify-start h-12 text-base transition-all duration-200 ${activeTab === id
-                ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg scale-105"
-                : "hover:bg-secondary/20 hover:scale-102"
+              variant="ghost"
+              className={`w-full justify-start h-11 px-3 text-xs md:text-sm font-bold uppercase tracking-widest transition-all duration-300 rounded-xl relative group ${activeTab === id
+                ? "bg-secondary/10 text-secondary"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
             >
-              <Icon className="h-5 w-5 mr-3" />
+              <Icon className={cn(
+                "h-4 w-4 mr-3 transition-transform duration-300",
+                activeTab === id ? "scale-110" : "group-hover:scale-110"
+              )} />
               {label}
               {activeTab === id && (
-                <div className="ml-auto w-2 h-2 bg-primary-foreground rounded-full" />
+                <div className="absolute right-3 w-1 h-4 bg-secondary rounded-full shadow-[0_0_8px_rgba(var(--secondary),0.4)]" />
               )}
             </Button>
           ))}
         </nav>
 
-
-
-        {/* Bottom Section */}
-        <div className="absolute bottom-6 left-6 right-6">
-          <div className="p-4 glass-strong rounded-xl border border-border/30">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-secondary/20">
-                <User className="h-4 w-4 text-secondary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">Guest User</p>
-                <p className="text-xs text-muted-foreground">Free Plan</p>
-              </div>
+        {/* Bottom Section - Minimalist User */}
+        <div className="pt-6 border-t border-border/5">
+          <div className="flex items-center gap-3 px-3 py-2">
+            <div className="h-8 w-8 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary font-black text-xs">
+              G
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-black text-foreground truncate uppercase tracking-tighter">Guest</span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-50">Standard</span>
             </div>
           </div>
         </div>
@@ -113,114 +109,89 @@ export function ResponsiveNavigation({ activeTab, onTabChange }: NavigationProps
     </div>
   )
 
-  // Desktop Top Header
+  // Desktop Top Header - Simplified (Only for Spacing/Context)
   const DesktopHeader = () => (
-    <div className="hidden md:block fixed top-0 left-64 right-0 z-30 glass-strong border-b border-border/30 backdrop-blur-xl">
-      <div className="flex items-center justify-center px-4 md:px-6 lg:px-8 py-3 md:py-4 h-16">
-        {/* Centered Brand / Title in Header */}
-        <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-muted-foreground opacity-50">
-          Dashboard Engine
-        </h2>
-      </div>
-    </div>
+    <div className="hidden md:block fixed top-0 left-[240px] right-0 z-30 h-4" />
   )
 
   // Mobile Top Header
   const MobileHeader = () => (
-    <div className="md:hidden fixed top-0 left-0 right-0 z-50 glass-strong border-b border-white/5 backdrop-blur-xl bg-background/80">
-      <div className="flex items-center justify-between px-4 py-2.5">
-        {/* Logo and Title */}
-        <div className="flex items-center space-x-3">
-          <div className="p-1.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10">
+    <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/80 border-b border-white/5 backdrop-blur-xl">
+      <div className="flex items-center justify-between px-4 h-14">
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-lg bg-primary/5 border border-white/10 shadow-sm">
             <img src="/x-logo.svg" alt="Xpense Logo" className="h-5 w-5" />
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-base font-bold text-foreground leading-tight">Xpense</h1>
-            <p className="text-[10px] text-muted-foreground leading-none">Smart Finance</p>
-          </div>
+          <h1 className="text-sm font-extrabold text-foreground uppercase tracking-[0.2em] pt-0.5">Xpense</h1>
         </div>
 
-        {/* Profile and Mobile Menu */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2">
-
-          {/* Mobile Menu Button */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 sm:h-9 sm:w-9 p-0 glass-strong hover:bg-secondary/20 backdrop-blur-sm"
-              >
-                <Menu className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <SheetDescription className="sr-only">Mobile navigation menu for Xpense application</SheetDescription>
-              <div className="h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border/30">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 rounded-lg bg-black/20 backdrop-blur-sm">
-                      <img src="/x-logo.svg" alt="Xpense Logo" className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold">Xpense</h2>
-                      <p className="text-sm text-muted-foreground">Smart Finance</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 hover:bg-secondary/20"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+        {/* Mobile Menu Button */}
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 p-0 hover:bg-secondary/10 rounded-xl"
+            >
+              <Menu className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] p-0 bg-background/95 border-r border-white/5 backdrop-blur-2xl">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetDescription className="sr-only">Mobile navigation menu for Xpense application</SheetDescription>
+            <div className="h-full flex flex-col pt-8 pb-6">
+              <div className="px-6 mb-10 flex items-center gap-3">
+                <div className="p-1.5 rounded-xl bg-primary/5 border border-white/10 shadow-sm">
+                  <img src="/x-logo.svg" alt="Xpense Logo" className="h-6 w-6" />
                 </div>
+                <h2 className="text-lg font-extrabold tracking-[0.2em] text-foreground uppercase pt-0.5">Xpense</h2>
+              </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 p-6 space-y-3">
-                  {navigationItems.map(({ id, label, icon: Icon }) => (
-                    <Button
-                      key={id}
-                      onClick={() => handleTabChange(id as typeof activeTab)}
-                      variant={activeTab === id ? "default" : "ghost"}
-                      className={`w-full justify-start h-12 text-base transition-all duration-200 ${activeTab === id
-                        ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg"
-                        : "hover:bg-secondary/20"
-                        }`}
-                    >
-                      <Icon className="h-5 w-5 mr-3" />
-                      {label}
-                      {activeTab === id && (
-                        <div className="ml-auto w-2 h-2 bg-primary-foreground rounded-full" />
-                      )}
-                    </Button>
-                  ))}
-                </nav>
+              {/* Navigation Menu */}
+              <nav className="flex-1 px-4 space-y-1">
+                {navigationItems.map(({ id, label, icon: Icon }) => (
+                  <Button
+                    key={id}
+                    onClick={() => handleTabChange(id as typeof activeTab)}
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start h-12 px-4 text-xs font-black uppercase tracking-widest transition-all duration-300 rounded-xl relative group",
+                      activeTab === id
+                        ? "bg-secondary/10 text-secondary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "h-4 w-4 mr-4 transition-transform duration-300",
+                      activeTab === id ? "scale-110" : "group-hover:scale-110"
+                    )} />
+                    {label}
+                    {activeTab === id && (
+                      <div className="absolute right-4 w-1 h-5 bg-secondary rounded-full shadow-[0_0_8px_rgba(var(--secondary),0.4)]" />
+                    )}
+                  </Button>
+                ))}
+              </nav>
 
-                {/* Bottom Section - User Profile */}
-                <div className="p-6 border-t border-border/30">
-                  <div className="p-4 glass-strong rounded-xl border border-border/30">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-secondary/20">
-                        <User className="h-4 w-4 text-secondary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">Guest User</p>
-                        <p className="text-xs text-muted-foreground">Free Plan</p>
-                      </div>
-                    </div>
+              {/* Bottom Section - User Profile */}
+              <div className="px-4 mt-8 pt-6 border-t border-white/5">
+                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div className="h-9 w-9 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary font-black text-xs">
+                    G
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-black text-foreground truncate uppercase tracking-tighter">Guest</span>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-50">Standard Plan</span>
                   </div>
                 </div>
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   )
+
 
 
 

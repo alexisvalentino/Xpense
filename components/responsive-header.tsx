@@ -2,7 +2,7 @@
 
 export function ResponsiveHeader() {
   return (
-    <div className="flex items-center justify-between mb-0 md:mb-4">
+    <div className="flex items-center justify-between mb-0 md:mb-0">
       {/* Header content can be added here in the future */}
       <div className="flex-1" />
     </div>

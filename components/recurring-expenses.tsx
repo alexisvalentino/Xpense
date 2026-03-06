@@ -224,10 +224,18 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading, re
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-8">
       {/* Header Card */}
-      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
-        <CardHeader className="pb-4">
+      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl relative overflow-hidden group">
+        {/* Top Glow Highlight */}
+        <div
+          className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+          style={{
+            backgroundColor: "#22c55e", // Matching green icon
+            boxShadow: `0 0 20px 2px #22c55e`
+          }}
+        />
+        <CardHeader className="p-3 md:p-6 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-3 text-xl font-bold">
               <Repeat className="h-6 w-6 text-secondary" />
@@ -238,8 +246,8 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading, re
               variant={showForm ? "ghost" : "outline"}
               size="sm"
               className={`rounded-full px-4 h-9 transition-all duration-300 ${showForm
-                  ? "text-muted-foreground hover:bg-card/20"
-                  : "bg-secondary/10 border-secondary/30 text-secondary hover:bg-secondary/20"
+                ? "text-muted-foreground hover:bg-card/20"
+                : "bg-secondary/10 border-secondary/30 text-secondary hover:bg-secondary/20"
                 }`}
             >
               {showForm ? "Close Form" : <><Plus className="h-4 w-4 mr-2" /> New Template</>}
@@ -330,28 +338,34 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading, re
           {recurringExpenses.map((expense) => {
             const dueStatus = getDueStatus(expense.nextDue)
             return (
-              <Card key={expense.id} className="relative glass-strong bg-card/20 border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
-                {/* Visual Accent */}
+              <Card key={expense.id} className="relative glass-strong bg-card/20 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                {/* Top Glow Highlight */}
                 <div
-                  className="absolute top-0 left-0 w-full h-1 opacity-50 transition-opacity group-hover:opacity-100"
-                  style={{ backgroundColor: getCategoryColor(expense.category) }}
+                  className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                  style={{
+                    backgroundColor: getCategoryColor(expense.category),
+                    boxShadow: `0 0 20px 2px ${getCategoryColor(expense.category)}`
+                  }}
                 />
 
                 <CardContent className="p-5 flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 rounded-xl bg-card/20 border border-border/10 backdrop-blur-md">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getCategoryColor(expense.category) }} />
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-2xl bg-card/10 border border-white/5 backdrop-blur-md flex items-center justify-center">
+                        <Repeat className="h-4 w-4 text-muted-foreground/60" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <h4 className="font-black text-sm uppercase tracking-tight text-foreground truncate">{expense.description}</h4>
+                        <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-50 truncate">{expense.category}</span>
+                      </div>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button onClick={() => handleEdit(expense)} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-secondary/20"><Edit className="h-3 w-3" /></Button>
-                      <Button onClick={() => handleDelete(expense.id)} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-destructive/20 text-destructive"><Trash2 className="h-3 w-3" /></Button>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <Button onClick={() => handleEdit(expense)} variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-xl hover:bg-secondary/10 hover:text-secondary"><Edit className="h-3.5 w-3.5" /></Button>
+                      <Button onClick={() => handleDelete(expense.id)} variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-xl hover:bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
                   </div>
 
                   <div className="flex-1">
-                    <h4 className="text-lg font-bold text-foreground mb-1 line-clamp-1">{expense.description}</h4>
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-4">{expense.category}</span>
-
                     <div className="flex items-baseline gap-1 mb-1">
                       <span className="text-2xl font-black text-foreground">${expense.amount.toLocaleString()}</span>
                       <span className="text-xs text-muted-foreground font-medium">/ {expense.frequency}</span>
@@ -363,7 +377,7 @@ export function RecurringExpenses({ onAddExpense, isLoading: externalLoading, re
                       <Badge
                         variant="outline"
                         className={`text-[10px] border-none font-bold uppercase transition-colors ${dueStatus.status === 'overdue' ? 'bg-destructive/20 text-destructive' :
-                            dueStatus.status === 'due' ? 'bg-secondary/20 text-secondary' : 'bg-card/30 text-muted-foreground'
+                          dueStatus.status === 'due' ? 'bg-secondary/20 text-secondary' : 'bg-card/30 text-muted-foreground'
                           }`}
                       >
                         <Clock className="h-3 w-3 mr-1" /> {dueStatus.text}

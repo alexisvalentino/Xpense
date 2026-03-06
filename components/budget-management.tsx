@@ -161,10 +161,18 @@ export function BudgetManagement({ expenses, isLoading: externalLoading, budgets
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-8">
       {/* Header with Control */}
-      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl shrink-0">
-        <CardHeader className="p-4 md:pb-4">
+      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl shrink-0 relative overflow-hidden group">
+        {/* Top Glow Highlight */}
+        <div
+          className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+          style={{
+            backgroundColor: "#22c55e", // Matching green icon
+            boxShadow: `0 0 20px 2px #22c55e`
+          }}
+        />
+        <CardHeader className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <CardTitle className="flex items-center space-x-3 text-lg md:text-xl font-bold">
               <Target className="h-5 w-5 md:h-6 md:w-6 text-secondary" />
@@ -250,27 +258,30 @@ export function BudgetManagement({ expenses, isLoading: externalLoading, budgets
       {budgetProgress.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {budgetProgress.map((progress) => (
-            <Card key={progress.budget.id} className="relative glass-strong bg-card/20 border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
-              {/* Status Indicator Bar */}
+            <Card key={progress.budget.id} className="relative glass-strong bg-card/20 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
+              {/* Top Glow Highlight */}
               <div
-                className="absolute top-0 left-0 w-full h-1 transition-opacity opacity-70"
-                style={{ backgroundColor: getBudgetStatusColor(progress.status) }}
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                style={{
+                  backgroundColor: getBudgetStatusColor(progress.status),
+                  boxShadow: `0 0 20px 2px ${getBudgetStatusColor(progress.status)}`
+                }}
               />
 
               <CardContent className="p-4 md:p-5 flex flex-col h-full">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 md:p-2 rounded-xl bg-card/20 border border-border/10 backdrop-blur-md">
-                      <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: getCategoryColor(progress.budget.category) }} />
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 rounded-2xl bg-card/10 border border-white/5 backdrop-blur-md flex items-center justify-center">
+                      <Target className="h-4 w-4 text-muted-foreground/60" />
                     </div>
-                    <div>
-                      <h4 className="font-bold text-sm md:text-base text-foreground line-clamp-1">{progress.budget.category}</h4>
-                      <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{formatPeriod(progress.budget.period)}</span>
+                    <div className="flex flex-col">
+                      <h4 className="font-black text-sm uppercase tracking-tight text-foreground line-clamp-1">{progress.budget.category}</h4>
+                      <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-50">{formatPeriod(progress.budget.period)}</span>
                     </div>
                   </div>
-                  <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <Button onClick={() => handleEdit(progress.budget)} variant="secondary" size="sm" className="h-7 w-7 p-0 rounded-full bg-secondary/20 hover:bg-secondary/40"><Edit className="h-3 w-3" /></Button>
-                    <Button onClick={() => handleDelete(progress.budget.id)} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full hover:bg-destructive/20 text-destructive"><Trash2 className="h-3 w-3" /></Button>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <Button onClick={() => handleEdit(progress.budget)} variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-xl hover:bg-secondary/10 hover:text-secondary"><Edit className="h-3.5 w-3.5" /></Button>
+                    <Button onClick={() => handleDelete(progress.budget.id)} variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-xl hover:bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </div>
 
@@ -305,10 +316,10 @@ export function BudgetManagement({ expenses, isLoading: externalLoading, budgets
                       ) : (
                         <span className="text-red-500 font-black">Over by ${(progress.spent - progress.budget.limit).toLocaleString()}</span>
                       )}
-                      <div className="flex items-center gap-1">
-                        {progress.status === "safe" && <CheckCircle className="h-3 w-3 text-green-500" />}
+                      <div className="flex items-center gap-1 opacity-50">
+                        {progress.status === "safe" && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
                         {(progress.status === "warning" || progress.status === "danger" || progress.status === "exceeded") &&
-                          <AlertTriangle className="h-3 w-3 text-amber-500" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                         }
                       </div>
                     </div>

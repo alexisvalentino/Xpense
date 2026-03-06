@@ -342,9 +342,17 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
-        <CardHeader className="pb-4">
+    <div className="space-y-4 md:space-y-8">
+      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl relative overflow-hidden group">
+        {/* Top Glow Highlight */}
+        <div
+          className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+          style={{
+            backgroundColor: "hsl(var(--secondary))",
+            boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+          }}
+        />
+        <CardHeader className="p-3 md:p-6 pb-4">
           <CardTitle className="flex items-center space-x-3 text-xl font-bold">
             <Download className="h-6 w-6 text-secondary" />
             <span>Reports & Data</span>
@@ -354,50 +362,72 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           </p>
         </CardHeader>
         <CardContent className="space-y-8">
-          {/* Top Section: Date Selection & Summary */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-secondary" />
-                  Visual Report Period
+          {/* Top Section: Date Selection - Refined Range Picker */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+            <div className="flex-1 w-full space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <Label className="text-[10px] md:text-xs uppercase tracking-widest font-black text-muted-foreground flex items-center gap-2">
+                  <Calendar className="h-3.5 w-3.5 text-secondary" />
+                  Date Range Filter
                 </Label>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   {Object.entries(datePresets).slice(0, 3).map(([key, preset]) => (
                     <Button
                       key={key}
                       variant="ghost"
                       size="sm"
                       onClick={() => handlePresetSelect(key)}
-                      className="text-[10px] uppercase tracking-wider h-6 px-2 hover:bg-secondary/10 hover:text-secondary"
+                      className="text-[9px] font-black uppercase tracking-tighter h-6 px-2.5 rounded-lg border border-white/5 hover:bg-secondary/10 hover:text-secondary hover:border-secondary/20 transition-all"
                     >
-                      {key.split('-').map(w => w[0]).join('')}
+                      {key.split('-').map(w => w === 'last' ? 'L' : w === 'this' ? 'T' : w[0].toUpperCase()).join('')}
                     </Button>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="glass-strong bg-card/10 border-border/20 h-11 text-xs"
-                />
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="glass-strong bg-card/10 border-border/20 h-11 text-xs"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 glass-strong bg-card/10 border border-white/20 p-1.5 rounded-2xl">
+                <div className="relative group cursor-pointer" onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input');
+                  if (input) input.showPicker();
+                }}>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-muted-foreground/40 pointer-events-none group-focus-within:text-secondary/50 transition-colors">Start</span>
+                  <Input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="pl-14 pr-10 h-11 bg-transparent border-none text-[11px] font-bold focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer w-full"
+                  />
+                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 pointer-events-none group-hover:text-secondary/50 transition-colors" />
+                </div>
+                <div className="relative group cursor-pointer border-t sm:border-t-0 sm:border-l border-white/5" onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input');
+                  if (input) input.showPicker();
+                }}>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-muted-foreground/40 pointer-events-none group-focus-within:text-secondary/50 transition-colors">End</span>
+                  <Input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="pl-12 pr-10 h-11 bg-transparent border-none text-[11px] font-bold focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer w-full"
+                  />
+                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 pointer-events-none group-hover:text-secondary/50 transition-colors" />
+                </div>
               </div>
             </div>
 
-            <div className="glass-strong bg-secondary/5 border border-secondary/20 rounded-xl p-4 flex flex-col justify-center">
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Scope Summary</span>
+            <div className="w-full lg:w-64 glass-strong bg-secondary/5 border border-white/20 rounded-2xl p-4 flex flex-col justify-center min-h-[96px] relative overflow-hidden group">
+              {/* Top Glow Highlight */}
+              <div
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                style={{
+                  backgroundColor: "hsl(var(--secondary))",
+                  boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                }}
+              />
+              <span className="text-[9px] font-black uppercase tracking-widest text-secondary/60 mb-2">Scope Summary</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-foreground">${getFilteredExpenses().reduce((sum, e) => sum + e.amount, 0).toLocaleString()}</span>
-                <span className="text-xs text-muted-foreground">in {getFilteredExpenses().length} items</span>
+                <span className="text-2xl font-black text-foreground">${getFilteredExpenses().reduce((sum, e) => sum + e.amount, 0).toLocaleString()}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-50">/{getFilteredExpenses().length} items</span>
               </div>
             </div>
           </div>
@@ -407,7 +437,15 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           {/* Primary Actions: The Bento Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* BIG CARD: Intelligence Report */}
-            <Card className="lg:col-span-1 glass-strong bg-secondary/10 border-secondary/20 shadow-lg hover:shadow-secondary/5 transition-all duration-300 overflow-hidden group">
+            <Card className="lg:col-span-1 glass-strong bg-secondary/10 border-white/20 shadow-lg hover:shadow-secondary/5 transition-all duration-300 overflow-hidden group relative">
+              {/* Top Glow Highlight */}
+              <div
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                style={{
+                  backgroundColor: "hsl(var(--secondary))",
+                  boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                }}
+              />
               <CardContent className="p-5 md:p-6 flex flex-col h-full">
                 <div className="mb-4">
                   <div className="h-10 w-10 rounded-lg bg-secondary/20 flex items-center justify-center mb-3">
@@ -435,7 +473,15 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             </Card>
 
             {/* CARD: Spreadsheet */}
-            <Card className="glass-strong bg-card/10 border-border/20 hover:border-secondary/30 transition-all cursor-pointer group" onClick={() => handleExportCSV("expenses")}>
+            <Card className="glass-strong bg-card/10 border-white/20 hover:border-secondary/30 transition-all cursor-pointer group relative overflow-hidden" onClick={() => handleExportCSV("expenses")}>
+              {/* Top Glow Highlight */}
+              <div
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500 opacity-0 group-hover:opacity-100"
+                style={{
+                  backgroundColor: "hsl(var(--secondary))",
+                  boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                }}
+              />
               <CardContent className="p-5 md:p-6 flex flex-row sm:flex-col justify-between items-center sm:items-start h-full gap-4">
                 <div className="flex items-center sm:block gap-4">
                   <FileSpreadsheet className="h-6 w-6 text-muted-foreground group-hover:text-secondary sm:mb-3 transition-colors shrink-0" />
@@ -451,7 +497,15 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
             </Card>
 
             {/* CARD: Full Backup */}
-            <Card className="glass-strong bg-card/10 border-border/20 hover:border-secondary/30 transition-all cursor-pointer group" onClick={() => handleExportCSV("all")}>
+            <Card className="glass-strong bg-card/10 border-white/20 hover:border-secondary/30 transition-all cursor-pointer group relative overflow-hidden" onClick={() => handleExportCSV("all")}>
+              {/* Top Glow Highlight */}
+              <div
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500 opacity-0 group-hover:opacity-100"
+                style={{
+                  backgroundColor: "hsl(var(--secondary))",
+                  boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                }}
+              />
               <CardContent className="p-5 md:p-6 flex flex-row sm:flex-col justify-between items-center sm:items-start h-full gap-4">
                 <div className="flex items-center sm:block gap-4">
                   <Database className="h-6 w-6 text-muted-foreground group-hover:text-secondary sm:mb-3 transition-colors shrink-0" />
@@ -470,16 +524,24 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
           {/* Bottom Row: Minimal Maintenance */}
           <div className="pt-4 border-t border-border/10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4 flex-1 w-full max-w-xl">
-                <div className="p-2 rounded-full bg-card/20 border border-border/10">
-                  <Upload className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-6 flex-1 w-full max-w-2xl group/restore relative p-4 rounded-2xl glass-strong bg-card/5 border border-white/10 hover:border-white/20 transition-all">
+                {/* Subtle Glow background */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover/restore:opacity-100 transition-opacity" />
+
+                <div className="p-3 rounded-full bg-card/20 border border-white/20 shadow-lg group-hover/restore:bg-secondary/10 group-hover/restore:border-secondary/30 transition-all shrink-0">
+                  <Upload className="h-5 w-5 text-muted-foreground group-hover/restore:text-secondary transition-colors" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold">Restore from Backup</span>
-                    {selectedFileName && <span className="text-[10px] text-secondary animate-pulse">{selectedFileName}</span>}
+                <div className="flex-1 relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Restore from Backup</span>
+                    {selectedFileName && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                        <span className="text-[9px] font-black uppercase tracking-tighter text-secondary">{selectedFileName}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="relative group">
+                  <div className="relative">
                     <Input
                       id="import-file"
                       type="file"
@@ -489,9 +551,10 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
                     />
                     <div
                       onClick={() => document.getElementById('import-file')?.click()}
-                      className="h-10 rounded-lg border border-dashed border-border/30 bg-card/5 hover:bg-card/10 hover:border-secondary/50 transition-all flex items-center justify-center cursor-pointer text-[11px] text-muted-foreground"
+                      className="h-11 rounded-xl border border-dashed border-white/20 bg-card/5 hover:bg-card/10 hover:border-secondary/50 transition-all flex items-center justify-center cursor-pointer text-[11px] text-muted-foreground gap-3 group/drop"
                     >
-                      Drop file here or <span className="text-secondary font-bold mx-1">Browse</span>
+                      <Database className="h-3.5 w-3.5 opacity-40 group-hover/drop:opacity-100 transition-opacity" />
+                      <span>Drop file here or <span className="text-secondary font-bold mx-1">Browse</span></span>
                     </div>
                   </div>
                 </div>

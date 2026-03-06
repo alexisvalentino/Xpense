@@ -35,7 +35,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
 
   if (expenses.length === 0) {
     return (
-      <Card className="glass-strong bg-card/20 border-border/30 shadow-xl backdrop-blur-xl">
+      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl">
         <CardContent className="p-12 text-center">
           <div className="space-y-6">
             <TrendingUp className="h-12 w-12 text-secondary mx-auto" />
@@ -64,8 +64,16 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
             trend: analytics.monthlyComparison.changePercentage >= 0 ? 'up' : 'down'
           }
         ].map((metric, i) => (
-          <Card key={i} className="glass-strong bg-card/20 border-border/20 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-5">
+          <Card key={i} className="glass-strong bg-card/20 border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+            {/* Top Glow Highlight */}
+            <div
+              className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+              style={{
+                backgroundColor: "hsl(var(--secondary))",
+                boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+              }}
+            />
+            <CardContent className="p-4 md:p-5">
               <div className="flex items-center justify-between mb-2">
                 <div className="p-2 rounded-lg bg-secondary/10 border border-secondary/20">
                   <metric.icon className={`h-4 w-4 ${metric.trend === 'up' ? 'text-red-500' : metric.trend === 'down' ? 'text-green-500' : 'text-secondary'}`} />
@@ -86,7 +94,15 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
         <div className="lg:col-span-8 space-y-6">
           {/* Charts Bento */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="glass-strong bg-card/20 border-border/20 shadow-xl overflow-hidden group">
+            <Card className="glass-strong bg-card/20 border-white/20 shadow-xl overflow-hidden group relative">
+              {/* Top Glow Highlight */}
+              <div
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                style={{
+                  backgroundColor: "#8b5cf6",
+                  boxShadow: `0 0 20px 2px #8b5cf6`
+                }}
+              />
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs uppercase tracking-widest font-bold text-muted-foreground flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
@@ -108,7 +124,15 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
               </CardContent>
             </Card>
 
-            <Card className="glass-strong bg-card/20 border-border/20 shadow-xl overflow-hidden group">
+            <Card className="glass-strong bg-card/20 border-white/20 shadow-xl overflow-hidden group relative">
+              {/* Top Glow Highlight */}
+              <div
+                className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                style={{
+                  backgroundColor: "#8b5cf6",
+                  boxShadow: `0 0 20px 2px #8b5cf6`
+                }}
+              />
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs uppercase tracking-widest font-bold text-muted-foreground flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
@@ -133,8 +157,16 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
           </div>
 
           {/* Comparative Intel */}
-          <Card className="glass-strong bg-card/20 border-border/20 shadow-xl">
-            <CardHeader className="pb-4">
+          <Card className="glass-strong bg-card/20 border-white/20 shadow-xl relative overflow-hidden group">
+            {/* Top Glow Highlight */}
+            <div
+              className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+              style={{
+                backgroundColor: "hsl(var(--secondary))",
+                boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+              }}
+            />
+            <CardHeader className="p-3 md:p-6 pb-4">
               <CardTitle className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Comparative Period Analysis</CardTitle>
             </CardHeader>
             <CardContent>
@@ -149,7 +181,15 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
                   <p className="text-xl font-black text-muted-foreground/60">${analytics.monthlyComparison.previousMonth.amount.toLocaleString()}</p>
                   <span className="text-[10px] text-muted-foreground">{analytics.monthlyComparison.previousMonth.transactionCount} entries</span>
                 </div>
-                <div className="bg-secondary/5 border border-secondary/10 rounded-2xl p-4 flex flex-col justify-center">
+                <div className="bg-secondary/5 border border-white/20 rounded-2xl p-4 flex flex-col justify-center relative overflow-hidden group">
+                  {/* Top Glow Highlight */}
+                  <div
+                    className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                    style={{
+                      backgroundColor: "hsl(var(--secondary))",
+                      boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                    }}
+                  />
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] uppercase font-bold text-secondary">Delta</span>
                     {analytics.monthlyComparison.change >= 0 ? <ArrowUp className="h-3 w-3 text-red-500" /> : <ArrowDown className="h-3 w-3 text-green-500" />}
@@ -165,7 +205,15 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
 
         {/* Right Column - Category Breakdown */}
         <div className="lg:col-span-4">
-          <Card className="glass-strong bg-card/20 border-border/20 shadow-xl h-full flex flex-col">
+          <Card className="glass-strong bg-card/20 border-white/20 shadow-xl h-full flex flex-col relative overflow-hidden group">
+            {/* Top Glow Highlight */}
+            <div
+              className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+              style={{
+                backgroundColor: "#3b82f6", // Default blue for analytics
+                boxShadow: `0 0 20px 2px #3b82f6`
+              }}
+            />
             <CardHeader className="pb-6">
               <CardTitle className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Category Exposure</CardTitle>
             </CardHeader>
@@ -188,7 +236,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
                       }}
                     />
                   </div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground font-medium italic">
+                  <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
                     <span>{insight.transactionCount} records</span>
                     <span>{insight.percentage.toFixed(0)}% of total</span>
                   </div>
@@ -201,7 +249,15 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
 
       {/* Smart Intelligence / AI Insights */}
       {insights.length > 0 && (
-        <Card className="glass-strong bg-secondary/5 border-secondary/20 shadow-2xl overflow-hidden relative group">
+        <Card className="glass-strong bg-secondary/5 border-white/20 shadow-2xl overflow-hidden relative group">
+          {/* Top Glow Highlight */}
+          <div
+            className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500 z-20"
+            style={{
+              backgroundColor: "hsl(var(--secondary))",
+              boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+            }}
+          />
           <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] -mr-48 -mt-48 transition-all group-hover:bg-secondary/20" />
           <CardHeader className="pb-3 relative z-10 border-b border-white/5">
             <CardTitle className="flex items-center space-x-4">
@@ -216,7 +272,7 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
           </CardHeader>
           <CardContent className="relative z-10 py-8 px-6">
             <div className="max-w-4xl">
-              <p className="text-xl md:text-2xl font-medium text-foreground/90 leading-tight tracking-tight italic">
+              <p className="text-xl md:text-2xl font-medium text-foreground/90 leading-tight tracking-tight">
                 {insights[0]}
               </p>
             </div>

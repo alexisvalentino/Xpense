@@ -79,7 +79,15 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
   }
 
   return (
-    <Card className="glass-strong bg-card/20 md:bg-card/20 border-border/10 md:border-border/30 shadow-none md:shadow-xl backdrop-blur-xl border-none md:border-solid">
+    <Card className="glass-strong bg-card/20 md:bg-card/20 border-white/10 md:border-white/20 shadow-none md:shadow-xl backdrop-blur-xl border-none md:border-solid relative overflow-hidden group">
+      {/* Top Glow Highlight */}
+      <div
+        className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+        style={{
+          backgroundColor: "hsl(var(--secondary))",
+          boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+        }}
+      />
       <CardHeader className="pb-2 md:pb-4 px-0 md:px-6">
         <CardTitle className="flex items-center justify-between text-sm md:text-lg font-bold uppercase tracking-wider md:tracking-normal">
           <div className="flex items-center space-x-2 opacity-60 md:opacity-100">
@@ -152,8 +160,8 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
               </div>
             </div>
 
-            {/* Desktop: Grid layout */}
-            <div className="hidden md:grid md:grid-cols-6 gap-3">
+            {/* Desktop: Grid layout - Refined for Side-by-Side row */}
+            <div className="hidden md:grid md:grid-cols-3 gap-3">
               {options.slice(0, 6).map((option) => {
                 const IconComponent = getIconComponent(option.icon)
                 return (
@@ -161,14 +169,15 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
                     key={option.id}
                     onClick={() => handleQuickAdd(option)}
                     variant="outline"
-                    className="glass-strong bg-card/20 border-border/30 hover:border-secondary/50 flex flex-col items-center space-y-1.5 h-auto py-3 px-1 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl shadow-lg backdrop-blur-lg"
+                    className="group glass-strong bg-card/10 border-border/20 hover:border-secondary/50 flex flex-col items-center justify-center space-y-2 h-24 py-4 px-2 hover:bg-secondary/5 transition-all duration-300 hover:scale-[1.02] rounded-2xl shadow-sm hover:shadow-secondary/5 backdrop-blur-md relative overflow-hidden"
                   >
-                    <div className="h-4 w-4 text-secondary">
-                      <IconComponent className="h-4 w-4" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="h-8 w-8 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform duration-300">
+                      <IconComponent className="h-5 w-5" />
                     </div>
-                    <div className="text-center">
-                      <div className="text-[10px] font-bold text-foreground leading-tight truncate w-full px-1">{option.label}</div>
-                      <div className="text-[10px] text-muted-foreground/70">${option.amount}</div>
+                    <div className="text-center relative z-10">
+                      <div className="text-[10px] font-black text-foreground/90 uppercase tracking-wider truncate w-full px-1">{option.label}</div>
+                      <div className="text-[10px] font-bold text-secondary/70">${option.amount}</div>
                     </div>
                   </Button>
                 )
@@ -181,13 +190,13 @@ export function QuickAddButtons({ onQuickAdd }: QuickAddButtonsProps) {
                     if (settingsButton) settingsButton.click()
                   }}
                   variant="outline"
-                  className="glass-strong bg-card/10 border-dashed border-border/40 hover:border-secondary/50 flex flex-col items-center justify-center space-y-1 h-auto py-3 px-1 hover:bg-secondary/10 transition-all duration-200 hover:scale-105 rounded-xl border-2"
+                  className="glass-strong bg-card/5 border-dashed border-border/30 hover:border-secondary/40 flex flex-col items-center justify-center space-y-2 h-24 py-4 px-2 hover:bg-secondary/5 transition-all duration-300 hover:scale-[1.02] rounded-2xl border-2"
                 >
-                  <div className="h-4 w-4 text-secondary/60">
-                    <Plus className="h-4 w-4" />
+                  <div className="h-8 w-8 rounded-xl bg-muted/5 flex items-center justify-center text-muted-foreground/40 group-hover:scale-110 transition-transform">
+                    <Plus className="h-5 w-5" />
                   </div>
                   <div className="text-center">
-                    <div className="text-[10px] font-bold text-muted-foreground">Add More</div>
+                    <div className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-wider">Configure</div>
                   </div>
                 </Button>
               )}

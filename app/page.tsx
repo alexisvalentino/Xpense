@@ -445,9 +445,8 @@ export default function ExpenseTracker() {
   return (
     <div className="min-h-screen bg-background">
       <ResponsiveNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className="md:ml-64 transition-all duration-300">
-        <div className="container mx-auto px-4 md:px-6 py-2 md:py-6 space-y-2 md:space-y-6 max-w-7xl pb-safe pt-[54px] md:pt-24">
-          <ResponsiveHeader />
+      <div className="md:ml-[240px] transition-all duration-300">
+        <div className="container mx-auto px-4 md:px-6 py-0 md:py-4 space-y-0 md:space-y-4 max-w-7xl pb-safe pt-14 md:pt-10">
 
           {activeTab === "budgets" ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -483,151 +482,127 @@ export default function ExpenseTracker() {
               />
             </div>
           ) : (
-            <div className="space-y-3 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {/* Dynamic Notification Hub */}
-              {notifications.length > 0 && (
-                <div className="flex gap-2.5 overflow-x-auto pb-4 pt-1 scrollbar-hide no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 snap-x">
-                  {notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className={cn(
-                        "flex-shrink-0 flex items-center gap-3 p-3 rounded-2xl glass-strong border-[1px] transition-all duration-300 hover:scale-[1.02] cursor-default max-w-[280px] min-w-[240px] shadow-lg snap-center",
-                        n.severity === "danger"
-                          ? "bg-red-500/10 border-red-500/20 text-red-400"
-                          : n.severity === "warning"
-                            ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                            : "bg-secondary/10 border-secondary/20 text-secondary"
-                      )}
-                    >
-                      <div className={cn(
-                        "p-2 rounded-xl flex-shrink-0",
-                        n.severity === "danger" ? "bg-red-500/20" : n.severity === "warning" ? "bg-amber-500/20" : "bg-secondary/20"
-                      )}>
-                        {n.severity === "danger" ? (
-                          <TrendingUp className="h-4 w-4" />
-                        ) : (
-                          <Target className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[10px] uppercase font-black leading-tight tracking-wider truncate">
-                          {n.title}
+            <div className="space-y-2 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+              {/* Central Bento Grid - Horizon Layout for Desktop */}
+              <div className="space-y-4 md:space-y-8">
+                {/* Top Row: Full-Width Premium Balance Card */}
+                <Card className="relative overflow-hidden glass-strong border-white/20 shadow-2xl group min-h-[220px] md:min-h-[300px]">
+                  {/* Top Glow Highlight */}
+                  <div
+                    className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500 z-20"
+                    style={{
+                      backgroundColor: "hsl(var(--secondary))",
+                      boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                    }}
+                  />
+                  <div className="absolute -right-16 -top-16 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] opacity-60 group-hover:opacity-80 transition-opacity" />
+                  <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-primary/5 rounded-full blur-[80px] opacity-40 group-hover:opacity-60 transition-opacity" />
+
+                  <CardContent className="relative p-4 md:p-12 h-full flex flex-col justify-between overflow-hidden">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] md:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">
+                          Available Liquidity
                         </span>
-                        <span className="text-[9px] text-muted-foreground line-clamp-2 leading-relaxed">
-                          {n.message}
+                        <div className="h-[1px] w-8 bg-muted/20" />
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl xs:text-5xl md:text-8xl font-black tracking-tighter text-foreground drop-shadow-2xl">
+                          {isMounted ? `$${totalExpenses.toLocaleString()}` : "$0"}
+                        </span>
+                        <span className="text-xs md:text-sm font-bold text-secondary/80">
+                          USD
                         </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
 
-              {/* Central Bento Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
-                {/* Balance & Quick Actions Tile */}
-                <div className="lg:col-span-8 flex flex-col gap-3 md:gap-6">
-                  <Card className="relative overflow-hidden glass-strong border-secondary/20 shadow-2xl flex-1 group">
-                    <div className="absolute -right-16 -top-16 w-64 h-64 bg-secondary/10 rounded-full blur-3xl opacity-60 group-hover:opacity-80 transition-opacity" />
-                    <CardContent className="relative p-4 md:p-8 h-full flex flex-col justify-between overflow-hidden">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="space-y-0">
-                          <span className="text-[10px] md:text-xs font-black text-muted-foreground uppercase tracking-widest opacity-60">
-                            Current Balance
-                          </span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl xs:text-4xl md:text-7xl font-black tracking-tighter text-foreground drop-shadow-2xl">
-                              {isMounted ? `$${totalExpenses.toLocaleString()}` : "$0"}
-                            </span>
-                            <span className="text-[10px] font-bold text-secondary opacity-80 sm:hidden">
-                              USD
-                            </span>
+                    <div className="mt-8 pt-8 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-green-500/10">
+                            <TrendingDown className="h-4 w-4 text-green-500" />
                           </div>
-                        </div>
-                        <Button
-                          onClick={() => setShowForm(true)}
-                          className={cn(
-                            "hidden md:flex bg-secondary hover:bg-secondary/90 text-secondary-foreground h-14 px-8 rounded-2xl font-black shadow-lg shadow-secondary/20 transition-all text-base"
-                          )}
-                        >
-                          <Plus className="h-6 w-6 mr-2 stroke-[3px]" />
-                          Quick Entry
-                        </Button>
-                      </div>
-
-                      <div className="mt-4 md:mt-8 pt-4 md:pt-8 border-t border-white/5 grid grid-cols-2 md:flex md:flex-wrap gap-0 md:gap-6 items-center divide-x divide-white/5 md:divide-none">
-                        <div className="flex items-center gap-2 pr-2 md:pr-0">
-                          <div className="p-1.5 md:p-2 rounded-lg bg-green-500/10 shrink-0">
-                            <TrendingDown className="h-3 md:h-5 w-3 md:w-5 text-green-500" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="text-[7px] md:text-[10px] font-bold text-muted-foreground uppercase block leading-tight">
-                              Avg Daily
-                            </span>
-                            <span className="text-[10px] md:text-sm font-bold">$142.50</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 pl-4 md:pl-0">
-                          <div className="p-1.5 md:p-2 rounded-lg bg-red-500/10 shrink-0">
-                            <TrendingUp className="h-3 md:h-5 w-3 md:w-5 text-red-500" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="text-[7px] md:text-[10px] font-bold text-muted-foreground uppercase block leading-tight">
-                              Main Expense
-                            </span>
-                            <span className="text-[10px] md:text-sm font-bold truncate block">
-                              Food
-                            </span>
-                          </div>
-                        </div>
-                        <div className="ml-auto hidden xl:block">
-                          <span className="text-[10px] font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping" />
-                            System Live
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Daily Avg
                           </span>
                         </div>
+                        <p className="text-lg md:text-xl font-black">$142.50</p>
                       </div>
-                    </CardContent>
-                  </Card>
 
-                  <div className="grid grid-cols-1 gap-3 -mx-4 px-4 md:mx-0 md:px-0">
-                    <QuickAddButtons onQuickAdd={addExpense} />
-                  </div>
-                </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-red-500/10">
+                            <TrendingUp className="h-4 w-4 text-red-500" />
+                          </div>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Burn Rate
+                          </span>
+                        </div>
+                        <p className="text-lg md:text-xl font-black truncate">Food & Dining</p>
+                      </div>
 
-                {/* Categories & Insights Tile */}
-                <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6">
-                  <Card className="glass-strong bg-card/20 border-border/30 shadow-xl flex-1 flex flex-col min-h-[260px] md:min-h-[300px]">
-                    <CardHeader className="p-4 md:p-6 pb-2">
-                      <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                      <div className="hidden md:block space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-secondary/10">
+                            <Search className="h-4 w-4 text-secondary" />
+                          </div>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Ledger Status
+                          </span>
+                        </div>
+                        <p className="text-lg md:text-xl font-black">Synchronized</p>
+                      </div>
+
+                      <div className="hidden md:flex flex-col items-end ml-auto space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-secondary animate-pulse shadow-[0_0_8px_rgba(var(--secondary),0.6)]" />
+                          <span className="text-[10px] font-extrabold text-secondary uppercase tracking-widest">
+                            Engine Live
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground font-medium">Updated just now</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Second Row: Side-by-Side Quick Actions & Chart */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+                  <QuickAddButtons onQuickAdd={addExpense} />
+
+                  <Card className="glass-strong bg-card/20 border-white/20 shadow-xl overflow-hidden group min-h-[220px] relative">
+                    {/* Top Glow Highlight */}
+                    <div
+                      className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                      style={{
+                        backgroundColor: "hsl(var(--secondary))",
+                        boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                      }}
+                    />
+                    <CardHeader className="p-3 md:p-6 pb-2">
+                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center justify-between">
+                        Portfolio Split
                         <TrendingUp className="h-3 w-3 text-secondary" />
-                        Allocation
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col items-center justify-center p-0">
-                      <div className="w-full h-[180px] md:h-[220px]">
+                    <CardContent className="p-0">
+                      <div className="w-full h-[140px] md:h-[180px]">
                         <ExpenseChart expenses={filteredExpenses} compact />
                       </div>
-                      <div className="p-3 md:p-4 w-full grid grid-cols-3 border-t border-white/5 divide-x divide-white/5">
-                        <div className="text-center px-1 overflow-hidden">
-                          <span className="text-[8px] md:text-[9px] uppercase font-bold text-muted-foreground block truncate">
-                            Top Source
+                      <div className="p-4 grid grid-cols-2 gap-4 border-t border-white/5">
+                        <div className="space-y-0.5">
+                          <span className="text-[8px] uppercase font-bold text-muted-foreground block">
+                            Top Category
                           </span>
-                          <span className="text-[10px] md:text-xs font-bold block truncate">Groceries</span>
+                          <span className="text-xs font-black block truncate">Groceries</span>
                         </div>
-                        <div className="text-center px-1 overflow-hidden">
-                          <span className="text-[8px] md:text-[9px] uppercase font-bold text-muted-foreground block truncate">
-                            Efficiency
+                        <div className="space-y-0.5 text-right">
+                          <span className="text-[8px] uppercase font-bold text-muted-foreground block">
+                            Intelligence
                           </span>
-                          <span className="text-[10px] md:text-xs font-bold text-green-500 block truncate">
-                            Gold
-                          </span>
-                        </div>
-                        <div className="text-center px-1 overflow-hidden">
-                          <span className="text-[8px] md:text-[9px] uppercase font-bold text-muted-foreground block truncate">
-                            Items
-                          </span>
-                          <span className="text-[10px] md:text-xs font-bold block truncate">
-                            {expenses.length}
+                          <span className="text-xs font-black text-green-500 block truncate">
+                            Optimized Spending
                           </span>
                         </div>
                       </div>
@@ -638,7 +613,15 @@ export default function ExpenseTracker() {
 
               {/* Transactions Section */}
               {filteredExpenses.length > 0 ? (
-                <Card className="glass-strong bg-card/20 border-border/20 shadow-xl overflow-hidden">
+                <Card className="glass-strong bg-card/20 border-white/20 shadow-xl overflow-hidden relative">
+                  {/* Top Glow Highlight */}
+                  <div
+                    className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"
+                    style={{
+                      backgroundColor: "hsl(var(--secondary))",
+                      boxShadow: `0 0 20px 2px hsl(var(--secondary))`
+                    }}
+                  />
                   <CardHeader className="p-4 md:p-6 pb-2 md:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-xs md:text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -735,14 +718,14 @@ export default function ExpenseTracker() {
             </DialogContent>
           </Dialog>
 
-          {/* Mobile Floating Action Button */}
-          <div className="md:hidden fixed bottom-6 right-6 z-40">
+          {/* Universal Floating Action Button - Adaptive Scaling */}
+          <div className="fixed bottom-6 right-6 xl:bottom-8 xl:right-8 2xl:bottom-12 2xl:right-12 z-40">
             <Button
               onClick={() => setShowForm(true)}
-              className="h-14 w-14 rounded-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border border-secondary/30 hover:border-secondary/50 float-animation"
+              className="h-14 w-14 xl:h-16 xl:w-16 2xl:h-20 2xl:w-20 rounded-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-secondary/30 hover:border-secondary/50 float-animation group"
               size="lg"
             >
-              <Plus className="h-6 w-6" />
+              <Plus className="h-6 w-6 xl:h-7 xl:w-7 2xl:h-10 2xl:w-10 transition-transform duration-300 group-hover:rotate-90" />
             </Button>
           </div>
         </div>

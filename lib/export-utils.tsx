@@ -15,33 +15,41 @@ export interface ReportData {
 
 // Export functions for viewing (existing)
 export function generateCSV(expenses: Expense[]): string {
-  const headers = ["Date", "Description", "Amount", "Category"]
+  const headers = ["Transaction Date", "Vendor/Description", "Amount (USD)", "Category", "Internal ID"]
   const rows = expenses.map((expense) => [
-    expense.date,
+    new Date(expense.date).toISOString().split('T')[0],
     `"${expense.description.replace(/"/g, '""')}"`,
-    expense.amount.toString(),
+    expense.amount.toFixed(2),
     expense.category,
+    expense.id,
   ])
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
 }
 
 export function generateBudgetCSV(budgets: Budget[]): string {
-  const headers = ["Category", "Limit", "Period", "Created Date"]
-  const rows = budgets.map((budget) => [budget.category, budget.limit.toString(), budget.period, budget.createdAt])
+  const headers = ["Category", "Spending Limit (USD)", "Reset Period", "Creation Date", "Internal ID"]
+  const rows = budgets.map((budget) => [
+    budget.category,
+    budget.limit.toFixed(2),
+    budget.period,
+    new Date(budget.createdAt).toISOString().split('T')[0],
+    budget.id
+  ])
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
 }
 
 export function generateRecurringCSV(recurring: RecurringExpense[]): string {
-  const headers = ["Description", "Amount", "Category", "Frequency", "Next Due", "Active"]
+  const headers = ["Description", "Amount (USD)", "Category", "Frequency", "Next Due Date", "Status", "Internal ID"]
   const rows = recurring.map((expense) => [
     `"${expense.description.replace(/"/g, '""')}"`,
-    expense.amount.toString(),
+    expense.amount.toFixed(2),
     expense.category,
     expense.frequency,
     expense.nextDue,
-    expense.isActive.toString(),
+    expense.isActive ? "Active" : "Paused",
+    expense.id
   ])
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
@@ -254,231 +262,337 @@ export function generateReportHTML(data: ReportData): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Report - ${new Date(dateRange.from).toLocaleDateString()} to ${new Date(dateRange.to).toLocaleDateString()}</title>
+    <title>Xpense Insight Report - ${new Date(dateRange.from).toLocaleDateString()} to ${new Date(dateRange.to).toLocaleDateString()}</title>
     <style>
+        :root {
+            --background: #09090b;
+            --foreground: #fafafa;
+            --card: rgba(24, 24, 27, 0.4);
+            --border: rgba(255, 255, 255, 0.1);
+            --secondary: #9333ea;
+            --muted: #71717a;
+            --accent: #22c55e;
+        }
+        
+        * { box-sizing: border-box; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .summary-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .summary-card h3 {
-            margin: 0 0 10px 0;
-            color: #666;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-        .summary-card .value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2563eb;
-        }
-        .section {
-            background: white;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .section-header {
-            background: #f1f5f9;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .section-header h2 {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.5;
             margin: 0;
-            color: #334155;
+            padding: 40px 20px;
+            -webkit-print-color-adjust: exact;
         }
-        .section-content {
-            padding: 20px;
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
         }
+
+        header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background: rgba(147, 51, 234, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            tracking: 0.2em;
+        }
+
+        .report-meta {
+            text-align: right;
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+
+        .glow-rail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--secondary);
+            box-shadow: 0 0 15px var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 24px;
+        }
+
+        section h2 {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.2em;
+            margin-bottom: 16px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .category-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .category-amount {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--secondary);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #475569;
-        }
-        .amount {
-            font-weight: 600;
-            color: #dc2626;
-        }
-        .category-bar {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .category-name {
-            width: 120px;
-            font-weight: 500;
-        }
-        .category-amount {
-            margin-left: auto;
-            font-weight: 600;
-            color: #2563eb;
-        }
-        .footer {
-            text-align: center;
-            color: #666;
             font-size: 12px;
-            margin-top: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
         }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            color: var(--muted);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-weight: 600;
+        }
+
+        .td-amount {
+            font-weight: 900;
+            text-align: right;
+        }
+
+        .tr-row:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
         @media print {
-            body { background: white; }
-            .section { box-shadow: none; border: 1px solid #ddd; }
+            body { background: white; color: black; padding: 0; }
+            .card { border: 1px solid #ddd; backdrop-filter: none; background: white; }
+            .glow-rail { display: none; }
+            header, footer { border-color: #eee; }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Expense Report</h1>
-        <p><strong>Period:</strong> ${new Date(dateRange.from).toLocaleDateString()} - ${new Date(dateRange.to).toLocaleDateString()}</p>
-        <p><strong>Generated:</strong> ${new Date(generatedAt).toLocaleString()}</p>
-    </div>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <div class="logo-box">X</div>
+                <h1>Xpense</h1>
+            </div>
+            <div class="report-meta">
+                Intelligence Briefing<br>
+                ${new Date(dateRange.from).toLocaleDateString()} — ${new Date(dateRange.to).toLocaleDateString()}
+            </div>
+        </header>
 
-    <div class="summary">
-        <div class="summary-card">
-            <h3>Total Expenses</h3>
-            <div class="value">$${totalExpenses.toLocaleString()}</div>
+        <div class="stats-grid">
+            <div class="card">
+                <div class="glow-rail"></div>
+                <span class="stat-label">Total Outflow</span>
+                <div class="stat-value">$${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+            </div>
+            <div class="card">
+                <div class="glow-rail" style="background: var(--accent); box-shadow: 0 0 15px var(--accent);"></div>
+                <span class="stat-label">Entries</span>
+                <div class="stat-value">${expenses.length}</div>
+            </div>
+            <div class="card">
+                <div class="glow-rail"></div>
+                <span class="stat-label">Daily Avg</span>
+                <div class="stat-value">$${analytics.averageDaily.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+            </div>
+            <div class="card">
+                <div class="glow-rail" style="background: var(--accent); box-shadow: 0 0 15px var(--accent);"></div>
+                <span class="stat-label">Categories</span>
+                <div class="stat-value">${Object.keys(categoryTotals).length}</div>
+            </div>
         </div>
-        <div class="summary-card">
-            <h3>Transactions</h3>
-            <div class="value">${expenses.length}</div>
-        </div>
-        <div class="summary-card">
-            <h3>Categories</h3>
-            <div class="value">${Object.keys(categoryTotals).length}</div>
-        </div>
-        <div class="summary-card">
-            <h3>Daily Average</h3>
-            <div class="value">$${analytics.averageDaily.toLocaleString()}</div>
-        </div>
-    </div>
 
-    <div class="section">
-        <div class="section-header">
-            <h2>Spending by Category</h2>
-        </div>
-        <div class="section-content">
-            ${Object.entries(categoryTotals)
+        <div class="main-grid">
+            <section>
+                <h2>Capital Allocation</h2>
+                <div class="card">
+                    ${Object.entries(categoryTotals)
       .sort(([, a], [, b]) => b - a)
       .map(
         ([category, amount]) => `
-                <div class="category-bar">
-                    <span class="category-name">${category}</span>
-                    <span class="category-amount">$${amount.toLocaleString()}</span>
-                </div>
-            `,
+                        <div class="category-item">
+                            <span class="category-name">${category}</span>
+                            <span class="category-amount">$${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </div>
+                    `,
       )
       .join("")}
-        </div>
-    </div>
+                </div>
+            </section>
 
-    <div class="section">
-        <div class="section-header">
-            <h2>Recent Transactions</h2>
-        </div>
-        <div class="section-content">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${expenses
-      .slice(0, 20)
+            <section>
+                <h2>Transaction Ledger</h2>
+                <div class="card" style="padding: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th style="text-align: right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${expenses
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 50)
       .map(
         (expense) => `
-                        <tr>
-                            <td>${new Date(expense.date).toLocaleDateString()}</td>
-                            <td>${expense.description}</td>
-                            <td>${expense.category}</td>
-                            <td class="amount">$${expense.amount.toLocaleString()}</td>
-                        </tr>
-                    `,
+                                <tr class="tr-row">
+                                    <td>${new Date(expense.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</td>
+                                    <td>${expense.description}</td>
+                                    <td class="td-amount">$${expense.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                </tr>
+                            `,
       )
       .join("")}
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+                ${expenses.length > 50 ? `<p style="font-size: 10px; color: var(--muted); text-align: center; margin-top: 12px; font-weight: 700; text-transform: uppercase;">Showing latest 50 of ${expenses.length} entries</p>` : ''}
+            </section>
         </div>
-    </div>
 
-    ${budgets.length > 0
+        ${budgets.length > 0
       ? `
-    <div class="section">
-        <div class="section-header">
-            <h2>Budget Overview</h2>
-        </div>
-        <div class="section-content">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Budget</th>
-                        <th>Period</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${budgets
-        .map(
-          (budget) => `
+        <section style="margin-top: 32px;">
+            <h2>Financial Thresholds (Budgets)</h2>
+            <div class="card" style="padding: 0;">
+                <table>
+                    <thead>
                         <tr>
-                            <td>${budget.category}</td>
-                            <td class="amount">$${budget.limit.toLocaleString()}</td>
-                            <td>${budget.period}</td>
+                            <th>Category</th>
+                            <th>Threshold</th>
+                            <th>Period</th>
+                            <th>Status</th>
                         </tr>
-                    `,
-        )
-        .join("")}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    `
+                    </thead>
+                    <tbody>
+                        ${budgets.map(budget => {
+        const spent = categoryTotals[budget.category] || 0;
+        const percent = Math.min((spent / budget.limit) * 100, 100);
+        const isOver = spent > budget.limit;
+        return `
+                            <tr class="tr-row">
+                                <td>${budget.category}</td>
+                                <td>$${budget.limit.toLocaleString()}</td>
+                                <td>${budget.period}</td>
+                                <td style="color: ${isOver ? '#ef4444' : '#22c55e'}">${isOver ? 'Exceeded' : 'Healthy'}</td>
+                            </tr>
+                        `;
+      }).join("")}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        `
       : ""
     }
 
-    <div class="footer">
-        <p>This report was generated automatically by your Expense Tracker app.</p>
+        <footer>
+            Generated via Xpense Intelligence Engine &bull; ${new Date(generatedAt).toLocaleString()}
+        </footer>
     </div>
 </body>
 </html>
