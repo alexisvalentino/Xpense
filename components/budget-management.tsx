@@ -163,7 +163,7 @@ export function BudgetManagement({ expenses, isLoading: externalLoading, budgets
   return (
     <div className="space-y-4 md:space-y-8">
       {/* Header with Control */}
-      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl shrink-0 relative overflow-hidden group">
+      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl shrink-0 relative overflow-hidden group mt-4 md:mt-0">
         {/* Top Glow Highlight */}
         <div
           className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"

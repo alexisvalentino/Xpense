@@ -32,8 +32,8 @@ interface NavigationProps {
 
 const navigationItems = [
   { id: "overview", label: "Overview", icon: TrendingUp, shortLabel: "Home" },
-  { id: "budgets", label: "Budgets", icon: Target, shortLabel: "Budget" },
   { id: "analytics", label: "Analytics", icon: BarChart3, shortLabel: "Stats" },
+  { id: "budgets", label: "Budgets", icon: Target, shortLabel: "Budget" },
   { id: "recurring", label: "Recurring", icon: Repeat, shortLabel: "Recurring" },
   { id: "export", label: "Export", icon: Download, shortLabel: "Export" },
 ] as const

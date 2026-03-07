@@ -33,26 +33,12 @@ export function AnalyticsDashboard({ expenses, isLoading = false }: AnalyticsDas
     return <AnalyticsSkeleton />
   }
 
-  if (expenses.length === 0) {
-    return (
-      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl">
-        <CardContent className="p-12 text-center">
-          <div className="space-y-6">
-            <TrendingUp className="h-12 w-12 text-secondary mx-auto" />
-            <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">No data for analytics</h3>
-              <p className="text-muted-foreground text-base">Add some expenses to see your spending insights</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+  // Always render the UI, even with no data
 
   return (
     <div className="space-y-6">
       {/* Top Metrics Bento Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 md:mt-0">
         {[
           { label: "Daily Average", value: `$${analytics.averageDaily.toFixed(0)}`, icon: DollarSign, trend: null },
           { label: "Avg Transaction", value: `$${analytics.averageTransaction.toFixed(0)}`, icon: Target, trend: null },

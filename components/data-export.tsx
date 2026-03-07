@@ -343,7 +343,7 @@ export function DataExport({ expenses, budgets, recurring }: DataExportProps) {
 
   return (
     <div className="space-y-4 md:space-y-8">
-      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl relative overflow-hidden group">
+      <Card className="glass-strong bg-card/20 border-white/20 shadow-xl backdrop-blur-xl relative overflow-hidden group mt-4 md:mt-0">
         {/* Top Glow Highlight */}
         <div
           className="absolute top-0 left-0 w-full h-0.5 transition-all duration-500"

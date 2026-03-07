@@ -39,6 +39,7 @@ import {
   type RecurringExpense,
 } from "@/lib/db";
 import { calculateBudgetProgress } from "@/lib/budget-utils";
+import { calculateAnalytics } from "@/lib/analytics-utils";
 import {
   filterExpenses,
   hasActiveFilters,
@@ -436,6 +437,10 @@ export default function ExpenseTracker() {
     0,
   );
 
+  const analyticsData = useMemo(() => {
+    return calculateAnalytics(expenses);
+  }, [expenses]);
+
   if (isLoading) {
     return <MainPageSkeleton />;
   }
@@ -446,9 +451,13 @@ export default function ExpenseTracker() {
     <div className="min-h-screen bg-background">
       <ResponsiveNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="md:ml-[240px] transition-all duration-300">
-        <div className="container mx-auto px-4 md:px-6 py-0 md:py-4 space-y-0 md:space-y-4 max-w-7xl pb-safe pt-14 md:pt-10">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-4 space-y-4 md:space-y-4 max-w-7xl pb-safe pt-20 md:pt-10">
 
-          {activeTab === "budgets" ? (
+          {activeTab === "analytics" ? (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <AnalyticsDashboard expenses={expenses} isLoading={isLoading} />
+            </div>
+          ) : activeTab === "budgets" ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <BudgetManagement
                 expenses={expenses}
@@ -458,10 +467,6 @@ export default function ExpenseTracker() {
                 onUpdateBudget={updateBudget}
                 onDeleteBudget={deleteBudgetById}
               />
-            </div>
-          ) : activeTab === "analytics" ? (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <AnalyticsDashboard expenses={expenses} isLoading={isLoading} budgets={budgets} />
             </div>
           ) : activeTab === "recurring" ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -527,7 +532,9 @@ export default function ExpenseTracker() {
                             Daily Avg
                           </span>
                         </div>
-                        <p className="text-lg md:text-xl font-black">$142.50</p>
+                        <p className="text-lg md:text-xl font-black">
+                          {isMounted && expenses.length > 0 ? `$${analyticsData.averageDaily.toFixed(2)}` : "$0.00"}
+                        </p>
                       </div>
 
                       <div className="space-y-1">
@@ -539,7 +546,9 @@ export default function ExpenseTracker() {
                             Burn Rate
                           </span>
                         </div>
-                        <p className="text-lg md:text-xl font-black truncate">Food & Dining</p>
+                        <p className="text-lg md:text-xl font-black truncate">
+                          {isMounted && expenses.length > 0 ? analyticsData.topCategory : "N/A"}
+                        </p>
                       </div>
 
                       <div className="hidden md:block space-y-1">
